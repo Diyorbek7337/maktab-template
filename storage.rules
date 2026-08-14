@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Rasm va fayllar sayt uchun ommaviy ko'rinadi, faqat login qilgan
+    // admin (Firebase Auth custom token) yuklay/o'chira oladi.
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+    }
+  }
+}

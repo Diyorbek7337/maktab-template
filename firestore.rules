@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Ommaviy tarkib: sayt uchun hamma o'qiy oladi, faqat login qilgan
+    // admin (Firebase Auth custom token orqali) yoza oladi.
+    match /news/{id}            { allow read: if true; allow write: if request.auth != null; }
+    match /gallery/{id}         { allow read: if true; allow write: if request.auth != null; }
+    match /teachers/{id}        { allow read: if true; allow write: if request.auth != null; }
+    match /administration/{id}  { allow read: if true; allow write: if request.auth != null; }
+    match /clubs/{id}           { allow read: if true; allow write: if request.auth != null; }
+    match /olympiadWinners/{id} { allow read: if true; allow write: if request.auth != null; }
+    match /alumni/{id}          { allow read: if true; allow write: if request.auth != null; }
+    match /schedule/{id}        { allow read: if true; allow write: if request.auth != null; }
+
+    // Xabarlar: har kim yozishi (kontakt forma) mumkin, lekin faqat
+    // admin o'qiy/o'zgartira/o'chira oladi — mijoz ma'lumotlari himoyalangan.
+    match /messages/{id} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

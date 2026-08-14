@@ -1,0 +1,140 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import Navbar from "@/components/site/Navbar";
+import Footer from "@/components/site/Footer";
+import { getGallery, type GalleryItem } from "@/lib/firestore";
+import { fadeUp, stagger, scaleIn } from "@/lib/animations";
+
+const ALL = "Barchasi";
+
+export default function GalleryPage() {
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [active, setActive] = useState(ALL);
+  const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getGallery().then(setItems).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const categories = [ALL, ...Array.from(new Set(items.map((i) => i.category).filter(Boolean)))];
+  const filtered = active === ALL ? items : items.filter((i) => i.category === active);
+
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gray-50">
+        <div className="mx-auto max-w-6xl px-4 py-12">
+
+          <motion.div variants={stagger} initial="hidden" animate="show">
+            <motion.nav variants={fadeUp} className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+              <Link href="/" className="hover:text-primary">Bosh sahifa</Link>
+              <span>/</span>
+              <span className="text-gray-900">Galereya</span>
+            </motion.nav>
+            <motion.h1 variants={fadeUp} className="text-3xl font-bold text-gray-900">Galereya</motion.h1>
+            <motion.p variants={fadeUp} className="mt-2 text-gray-500">Maktab hayotidagi eng yaxshi lahzalar</motion.p>
+          </motion.div>
+
+          {/* Kategoriya filter */}
+          {categories.length > 1 && (
+            <motion.div variants={fadeUp} initial="hidden" animate="show" className="mt-6 flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActive(cat ?? ALL)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+                    active === cat
+                      ? "bg-primary text-white shadow-sm"
+                      : "border border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </motion.div>
+          )}
+
+          {loading ? (
+            <div className="mt-20 text-center text-gray-400">Yuklanmoqda…</div>
+          ) : filtered.length === 0 ? (
+            <div className="mt-20 text-center text-gray-400">Rasmlar yo'q</div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-8 columns-2 gap-3 sm:columns-3 lg:columns-4"
+              >
+                {filtered.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    variants={scaleIn}
+                    initial="hidden"
+                    animate="show"
+                    onClick={() => setLightbox(item)}
+                    className="group mb-3 block w-full overflow-hidden rounded-xl"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.url}
+                      alt={item.caption ?? ""}
+                      className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </motion.button>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </div>
+      </main>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+            onClick={() => setLightbox(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative max-h-[90vh] max-w-4xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={lightbox.url} alt={lightbox.caption ?? ""} className="max-h-[80vh] rounded-xl object-contain" />
+              {lightbox.caption && (
+                <p className="mt-3 text-center text-sm text-gray-300">{lightbox.caption}</p>
+              )}
+              <button
+                onClick={() => setLightbox(null)}
+                className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-800 shadow"
+              >
+                ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Footer />
+    </>
+  );
+}
