@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { getNews, type NewsDoc } from "@/lib/firestore";
-import { initialNews, formatDateUz, type NewsItem } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
 type AnyNews = NewsDoc | (NewsItem & { id: string | number });
@@ -54,16 +54,18 @@ export default function News() {
           whileInView="show"
           viewport={{ once: true, amount: 0.1 }}
         >
-          {news.slice(0, PREVIEW).map((item) => (
+          {news.slice(0, PREVIEW).map((item) => {
+            const cover = newsImages(item)[0];
+            return (
             <motion.div key={String(item.id)} variants={scaleIn}>
               <Link
                 href={`/news/${toSlug(item)}`}
                 className="group flex flex-col rounded-xl border border-gray-200 bg-white overflow-hidden transition-all hover:border-primary hover:shadow-md"
               >
-                {item.image ? (
+                {cover ? (
                   <div className="relative h-48 w-full overflow-hidden">
                     <Image
-                      src={item.image}
+                      src={cover}
                       alt={item.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -95,7 +97,8 @@ export default function News() {
                 </div>
               </Link>
             </motion.div>
-          ))}
+            );
+          })}
         </motion.div>
 
       </div>

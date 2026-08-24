@@ -185,7 +185,8 @@ export interface NewsDoc {
   category: string;
   excerpt: string;
   content?: string;
-  image?: string;
+  image?: string;    // eski yozuvlar uchun (bitta rasm) — moslik saqlanadi
+  images?: string[];  // yangi: bir nechta rasm, [0] — asosiy (muqova)
   date: string;
   createdAt?: Timestamp;
 }
@@ -201,8 +202,11 @@ export async function addNews(data: Omit<NewsDoc, "id" | "createdAt">): Promise<
   return ref.id;
 }
 
-export async function deleteNews(id: string, image?: string): Promise<void> {
-  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "news", id))]);
+export async function deleteNews(id: string, images?: string[]): Promise<void> {
+  await Promise.all([
+    ...(images ?? []).map((url) => deleteStorageFile(url)),
+    deleteDoc(doc(db, "news", id)),
+  ]);
 }
 
 // ── Dars jadvali ──────────────────────────────────────────────

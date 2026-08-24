@@ -6,7 +6,7 @@ import Image from "next/image";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import { getNews, type NewsDoc } from "@/lib/firestore";
-import { initialNews, formatDateUz, type NewsItem } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
 
 type AnyNews = NewsDoc | (NewsItem & { id: string | number });
 
@@ -55,16 +55,18 @@ export default function NewsPage() {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {news.map((item) => (
+              {news.map((item) => {
+                const cover = newsImages(item)[0];
+                return (
                 <Link
                   key={String(item.id)}
                   href={`/news/${toSlug(item)}`}
                   className="group flex flex-col rounded-xl border border-gray-200 bg-white overflow-hidden hover:border-primary hover:shadow-md transition-all"
                 >
-                  {item.image ? (
+                  {cover ? (
                     <div className="relative h-48 w-full overflow-hidden">
                       <Image
-                        src={item.image}
+                        src={cover}
                         alt={item.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -95,7 +97,8 @@ export default function NewsPage() {
                     </span>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

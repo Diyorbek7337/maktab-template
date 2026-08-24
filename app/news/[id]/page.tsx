@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
-import { initialNews, formatDateUz } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages } from "@/lib/data";
 import { schoolConfig } from "@/school.config";
 import { getNews } from "@/lib/firestore";
 
@@ -28,13 +28,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!/^[a-z0-9-]{1,100}$/.test(params.id)) return {};
   const item = await findArticle(params.id);
   if (!item) return {};
+  const images = newsImages(item);
   return {
     title: item.title,
     description: item.excerpt,
     openGraph: {
       title: `${item.title} | ${schoolConfig.shortName}`,
       description: item.excerpt,
-      images: item.image ? [{ url: item.image }] : [],
+      images: images.length ? [{ url: images[0] }] : [],
     },
   };
 }
@@ -48,6 +49,8 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
   const paragraphs = ((item as { content?: string }).content ?? item.excerpt)
     .split("\n\n")
     .filter(Boolean);
+  const images = newsImages(item);
+  const gallery = images.slice(1);
 
   return (
     <>
@@ -64,10 +67,10 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
           </nav>
 
           <article className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-            {item.image && (
+            {images[0] && (
               <div className="relative h-64 w-full sm:h-80">
                 <Image
-                  src={item.image}
+                  src={images[0]}
                   alt={item.title}
                   fill
                   className="object-cover"
@@ -94,6 +97,22 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
                   <p key={i}>{p}</p>
                 ))}
               </div>
+
+              {gallery.length > 0 && (
+                <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {gallery.map((src, i) => (
+                    <div key={i} className="relative h-32 overflow-hidden rounded-lg sm:h-40">
+                      <Image
+                        src={src}
+                        alt={`${item.title} — rasm ${i + 2}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </article>
 

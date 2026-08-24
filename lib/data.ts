@@ -10,6 +10,13 @@ export function formatDateUz(iso: string): string {
   return `${d.getDate()} ${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// Eski yozuvlarda bitta "image", yangilarida "images" massivi bo'lishi
+// mumkin — ikkalasini ham bitta ro'yxatga birlashtiradi ([0] — muqova).
+export function newsImages(item: { image?: string; images?: string[] }): string[] {
+  if (item.images?.length) return item.images;
+  return item.image ? [item.image] : [];
+}
+
 export interface NewsItem {
   id: number;
   slug: string;   // URL uchun: "imtihon-boshlandi"

@@ -5,7 +5,8 @@ import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { getNews, addNews, deleteNews, type NewsDoc } from "@/lib/firestore";
-import { initialNews, formatDateUz } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages } from "@/lib/data";
+import { compressImage } from "@/lib/imageCompress";
 
 const CATEGORIES = ["E'lon", "Yangilik", "Yutuq", "Tadbir"];
 
@@ -20,8 +21,7 @@ export default function NewsAdminPage() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [excerpt, setExcerpt]   = useState("");
   const [content, setContent]   = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [preview, setPreview]   = useState("");
+  const [images, setImages]     = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
@@ -68,33 +68,33 @@ export default function NewsAdminPage() {
 
   useEffect(() => { load(); }, []);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)) {
-      alert("Faqat rasm fayllari qabul qilinadi (JPEG, PNG, WebP, GIF)");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) { alert("Fayl hajmi 5 MB dan oshmasin"); return; }
-
-    setPreview(URL.createObjectURL(file));
+  async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
     setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const storageRef = ref(storage, `news/${Date.now()}.${ext}`);
-      await uploadBytes(storageRef, file);
-      setImageUrl(await getDownloadURL(storageRef));
-    } catch {
-      alert("Firebase Storage ga yuklashda xatolik.");
-      setPreview("");
-    } finally {
-      setUploading(false);
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) { alert(`${file.name} — rasm fayli emas`); continue; }
+      if (file.size > 15 * 1024 * 1024) { alert(`${file.name} — 15 MB dan katta`); continue; }
+
+      try {
+        // Yuklashdan oldin siqamiz — sifat deyarli saqlanadi, hajm ancha kichrayadi.
+        const compressed = await compressImage(file);
+        const storageRef = ref(storage, `news/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`);
+        await uploadBytes(storageRef, compressed);
+        const url = await getDownloadURL(storageRef);
+        setImages((prev) => [...prev, url]);
+      } catch {
+        alert(`${file.name} — yuklashda xatolik`);
+      }
     }
+
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
-  function clearImage() {
-    setPreview(""); setImageUrl("");
-    if (fileRef.current) fileRef.current.value = "";
+  function removeImage(url: string) {
+    setImages((prev) => prev.filter((u) => u !== url));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,10 +111,11 @@ export default function NewsAdminPage() {
         excerpt: excerpt.trim(),
         content: content.trim() || undefined,
         date,
-        image: imageUrl || undefined,
+        images: images.length ? images : undefined,
+        image: images[0] || undefined,
       });
       setTitle(""); setExcerpt(""); setContent("");
-      setCategory(CATEGORIES[0]); setImageUrl(""); setPreview("");
+      setCategory(CATEGORIES[0]); setImages([]);
       if (fileRef.current) fileRef.current.value = "";
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -126,13 +127,13 @@ export default function NewsAdminPage() {
     }
   }
 
-  async function handleDelete(id: string, image?: string) {
+  async function handleDelete(item: NewsDoc) {
     if (!confirm("Yangiliklarni o'chirishni tasdiqlaysizmi?")) return;
     // initialNews dan kelgan yozuvlar (raqamli ID) o'chirilmaydi
-    const isStatic = initialNews.some((n) => String(n.id) === id);
+    const isStatic = initialNews.some((n) => String(n.id) === item.id);
     if (isStatic) { alert("Namuna yangiliklar o'chirilmaydi. Firestore'ga o'z yangiliklaringizni qo'shing."); return; }
-    await deleteNews(id, image).catch(() => {});
-    setNews((prev) => prev.filter((n) => n.id !== id));
+    await deleteNews(item.id, newsImages(item)).catch(() => {});
+    setNews((prev) => prev.filter((n) => n.id !== item.id));
   }
 
   return (
@@ -166,32 +167,42 @@ export default function NewsAdminPage() {
               rows={5} placeholder={"Yangilik to'liq matni...\n\nIkki satr oralig'i — yangi paragraf."} className="input resize-none" />
           </Field>
 
-          {/* Rasm */}
+          {/* Rasmlar */}
           <div>
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">Muqova rasmi (ixtiyoriy)</span>
-            {preview ? (
-              <div className="relative overflow-hidden rounded-lg border border-gray-200">
-                <Image src={preview} alt="preview" width={400} height={200} className="h-36 w-full object-cover" />
-                <button type="button" onClick={clearImage}
-                  className="absolute right-2 top-2 rounded-full bg-white/80 px-2 py-0.5 text-xs text-gray-600 hover:bg-white">
-                  ✕ O'chirish
-                </button>
-                {uploading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 text-sm text-primary">
-                    Yuklanmoqda…
+            <span className="mb-1.5 block text-sm font-medium text-gray-700">
+              Rasmlar (ixtiyoriy, bir nechtasini tanlash mumkin — birinchisi muqova bo'ladi)
+            </span>
+
+            {images.length > 0 && (
+              <div className="mb-2 grid grid-cols-3 gap-2">
+                {images.map((url, i) => (
+                  <div key={url} className="relative overflow-hidden rounded-lg border border-gray-200">
+                    <Image src={url} alt={`Rasm ${i + 1}`} width={150} height={100} className="h-20 w-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute left-1 top-1 rounded bg-primary/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        Muqova
+                      </span>
+                    )}
+                    <button type="button" onClick={() => removeImage(url)}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-xs text-gray-600 hover:bg-white">
+                      ✕
+                    </button>
                   </div>
-                )}
+                ))}
               </div>
-            ) : (
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-500 hover:border-primary hover:text-primary transition-colors">
-                <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M4 16l4-4m0 0l4 4m-4-4v8M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2M16 12l-4-4m0 0l-4 4" />
-                </svg>
-                Rasm tanlash (max 5 MB)
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-              </label>
             )}
+
+            <label className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed py-6 text-sm transition-colors ${
+              uploading ? "border-gray-200 text-gray-400" : "border-gray-300 text-gray-500 hover:border-primary hover:text-primary"
+            }`}>
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M4 16l4-4m0 0l4 4m-4-4v8M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2M16 12l-4-4m0 0l-4 4" />
+              </svg>
+              {uploading ? "Yuklanmoqda…" : "Rasmlar tanlash"}
+              <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+                onChange={handleFilesChange} disabled={uploading} />
+            </label>
           </div>
 
           <button type="submit" disabled={saving || uploading}
@@ -206,11 +217,13 @@ export default function NewsAdminPage() {
           <h3 className="text-sm font-medium text-gray-500">
             {loading ? "Yuklanmoqda…" : `Jami: ${news.length} ta yangilik`}
           </h3>
-          {news.map((item) => (
+          {news.map((item) => {
+            const cover = newsImages(item)[0];
+            return (
             <div key={item.id} className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4">
               <div className="flex gap-3 min-w-0">
-                {item.image && (
-                  <Image src={item.image} alt={item.title} width={64} height={64}
+                {cover && (
+                  <Image src={cover} alt={item.title} width={64} height={64}
                     className="h-16 w-16 shrink-0 rounded-lg object-cover" />
                 )}
                 <div className="min-w-0">
@@ -222,12 +235,13 @@ export default function NewsAdminPage() {
                   <time className="mt-1 block text-xs text-gray-400">{formatDateUz(item.date)}</time>
                 </div>
               </div>
-              <button onClick={() => handleDelete(item.id, item.image)}
+              <button onClick={() => handleDelete(item)}
                 className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors">
                 O'chirish
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
