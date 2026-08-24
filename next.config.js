@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // firebase-admin (jwks-rsa -> jose) webpack orqali bundle qilinganda
+  // ESM/CommonJS ziddiyatiga uchraydi — shuning uchun Node runtime'ga
+  // to'g'ridan-to'g'ri "require" qilinishi kerak (bundle qilinmasin).
+  experimental: {
+    serverComponentsExternalPackages: ["firebase-admin"],
+  },
+
   images: {
     remotePatterns: [
       {

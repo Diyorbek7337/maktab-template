@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { schoolConfig } from "@/school.config";
-import { adminAuth } from "@/lib/firebaseAdmin";
+import { getAdminAuth } from "@/lib/firebaseAdmin";
 
 // 15 daqiqada 10 ta urinishdan ko'p bo'lsa bloklash
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
   // autentifikatsiyalangan holda yoza oladi (rules: request.auth != null).
   let token: string;
   try {
-    token = await adminAuth.createCustomToken("admin");
+    token = await getAdminAuth().createCustomToken("admin");
   } catch {
     return NextResponse.json(
       { error: "Firebase Admin sozlanmagan. FIREBASE_ADMIN_* qiymatlarini tekshiring." },

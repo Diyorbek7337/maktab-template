@@ -1,7 +1,8 @@
 import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
+import { getAuth, type Auth } from "firebase-admin/auth";
 
-// Faqat serverda ishlatiladi (API route'lar ichida) — service account kaliti kerak.
+// Faqat serverda, so'rov kelganda chaqiriladi (build vaqtida emas) —
+// aks holda Next.js "collect page data" bosqichida env yo'qligida qulab tushadi.
 function getAdminApp(): App {
   if (getApps().length) return getApps()[0];
 
@@ -16,4 +17,6 @@ function getAdminApp(): App {
   return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
 }
 
-export const adminAuth = getAuth(getAdminApp());
+export function getAdminAuth(): Auth {
+  return getAuth(getAdminApp());
+}
