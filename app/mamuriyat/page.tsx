@@ -37,7 +37,7 @@ export default function MamuriyatPage() {
                 Rahbariyat
               </motion.span>
               <motion.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-gray-900">
-                Maktab ma'muriyati
+                Texnikum ma'muriyati
               </motion.h1>
               <motion.p variants={fadeUp} className="mt-2 text-gray-500">
                 {schoolConfig.name} rahbariyati va ma'muriyati

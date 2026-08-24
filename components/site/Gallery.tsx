@@ -40,7 +40,7 @@ export default function Gallery() {
         >
           <div>
             <span className="text-sm font-semibold uppercase tracking-wide text-primary">Galereya</span>
-            <h2 className="mt-3 text-3xl font-bold text-gray-900">Maktab hayotidan</h2>
+            <h2 className="mt-3 text-3xl font-bold text-gray-900">Texnikum hayotidan</h2>
           </div>
           {items.length > PREVIEW && (
             <Link href="/gallery" className="hidden text-sm font-medium text-primary hover:text-primary-hover sm:block">

@@ -42,7 +42,7 @@ export default function GalleryPage() {
               <span className="text-gray-900">Galereya</span>
             </motion.nav>
             <motion.h1 variants={fadeUp} className="text-3xl font-bold text-gray-900">Galereya</motion.h1>
-            <motion.p variants={fadeUp} className="mt-2 text-gray-500">Maktab hayotidagi eng yaxshi lahzalar</motion.p>
+            <motion.p variants={fadeUp} className="mt-2 text-gray-500">Texnikum hayotidagi eng yaxshi lahzalar</motion.p>
           </motion.div>
 
           {/* Kategoriya filter */}

@@ -7,16 +7,16 @@ import { stagger, fadeUp, slideLeft, slideRight } from "@/lib/animations";
 
 const features = [
   {
-    title: "Malakali o'qituvchilar",
-    text: "Tajribali va o'z ishiga fidoyi pedagoglar jamoasi.",
+    title: "Malakali ustozlar",
+    text: "Tajribali va o'z kasbiga fidoyi pedagoglar jamoasi.",
   },
   {
     title: "Zamonaviy sharoit",
-    text: "Yangilangan sinflar, laboratoriya va kompyuter xonalari.",
+    text: "Yangilangan sinflar, ustaxonalar va laboratoriyalar.",
   },
   {
-    title: "To'garaklar",
-    text: "Fan, sport va ijodiy yo'nalishlar bo'yicha qo'shimcha mashg'ulotlar.",
+    title: "Amaliy ta'lim",
+    text: "Har bir yo'nalish bo'yicha real ish tajribasi va malaka oshirish imkoniyati.",
   },
 ];
 
@@ -28,7 +28,7 @@ export default function About() {
       <div className="mx-auto max-w-6xl px-4 py-20">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
 
-          {/* Chap: maktab rasmi */}
+          {/* Chap: texnikum rasmi */}
           <motion.div
             className="relative"
             variants={slideLeft}
@@ -54,7 +54,7 @@ export default function About() {
                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   <p className="mt-3 text-sm text-primary/40">
-                    Maktab rasmi
+                    Texnikum rasmi
                     <br />
                     <span className="text-xs">(school.config.ts → schoolImage)</span>
                   </p>
@@ -85,15 +85,16 @@ export default function About() {
             viewport={{ once: true, amount: 0.3 }}
           >
             <span className="text-sm font-semibold uppercase tracking-wide text-primary">
-              Maktab haqida
+              Texnikum haqida
             </span>
             <h2 className="mt-3 text-3xl font-bold text-gray-900">
-              Bilim va tarbiya uyg'unligi
+              Bilim va kasb-mahorat uyg'unligi
             </h2>
             <p className="mt-4 text-gray-600">
-              {shortName} — o'quvchilarni har tomonlama rivojlantirishga
-              yo'naltirilgan ta'lim maskani. Biz har bir bolaning iqtidorini ochishga
-              intilamiz.
+              {shortName} — talabalarni tanlagan kasbi bo'yicha har tomonlama
+              tayyorlashga yo'naltirilgan ta'lim maskani. Biz har bir yoshning
+              iqtidorini ochishga va ish bozorida raqobatbardosh mutaxassis
+              qilib yetishtirishga intilamiz.
             </p>
 
             <motion.div

@@ -22,7 +22,7 @@ export default function History() {
           <span className="text-sm font-semibold uppercase tracking-wide text-primary">
             Tarix
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-gray-900">Maktabimiz tarixi</h2>
+          <h2 className="mt-3 text-3xl font-bold text-gray-900">Texnikumimiz tarixi</h2>
           <p className="mt-3 text-gray-500">
             {history[0].year}-yildan buyon ta'lim va tarbiya maskani
           </p>

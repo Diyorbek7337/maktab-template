@@ -8,10 +8,11 @@ import { auth } from "@/lib/firebase";
 
 const menu = [
   { href: "/admin",                  label: "Boshqaruv paneli",     icon: "grid"     },
+  { href: "/admin/majors",           label: "Yo'nalishlar",         icon: "major"    },
   { href: "/admin/news",             label: "Yangiliklar",          icon: "news"     },
   { href: "/admin/administration",   label: "Rahbariyat",           icon: "users"    },
   { href: "/admin/teachers",         label: "O'qituvchilar",        icon: "teacher"  },
-  { href: "/admin/olympiad",         label: "Olimpiada g'oliblari", icon: "medal"    },
+  { href: "/admin/olympiad",         label: "Musobaqa g'oliblari",  icon: "medal"    },
   { href: "/admin/gallery",          label: "Galereya",             icon: "image"    },
   { href: "/admin/schedule",         label: "Dars jadvali",         icon: "calendar" },
   { href: "/admin/clubs",            label: "To'garaklar",          icon: "club"     },
@@ -95,6 +96,12 @@ function MenuIcon({ name }: { name: string }) {
         <rect width="7" height="7" x="14" y="3" rx="1" />
         <rect width="7" height="7" x="14" y="14" rx="1" />
         <rect width="7" height="7" x="3" y="14" rx="1" />
+      </>
+    ),
+    major: (
+      <>
+        <rect width="20" height="14" x="2" y="7" rx="2" />
+        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
       </>
     ),
     news: (

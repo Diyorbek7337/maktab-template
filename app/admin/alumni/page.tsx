@@ -63,7 +63,7 @@ export default function AlumniAdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Bitiruvchilar</h2>
-          <p className="mt-1 text-gray-500">Maktab faxrli bitiruvchilarini boshqarish.</p>
+          <p className="mt-1 text-gray-500">Texnikum faxrli bitiruvchilarini boshqarish.</p>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}

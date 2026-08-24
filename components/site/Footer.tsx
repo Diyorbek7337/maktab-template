@@ -8,7 +8,8 @@ import { fadeUp, stagger } from "@/lib/animations";
 
 const quickLinks = [
   { href: "/", label: "Bosh sahifa" },
-  { href: "#about", label: "Maktab haqida" },
+  { href: "#about", label: "Texnikum haqida" },
+  { href: "#majors", label: "Yo'nalishlar" },
   { href: "/mamuriyat", label: "Ma'muriyat" },
   { href: "/news", label: "Yangiliklar" },
   { href: "#contact", label: "Aloqa" },
@@ -58,7 +59,7 @@ export default function Footer() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {/* Maktab haqida */}
+          {/* Texnikum haqida */}
           <motion.div variants={fadeUp} className="lg:col-span-1">
             <div className="flex items-center gap-3">
               {schoolConfig.logo ? (

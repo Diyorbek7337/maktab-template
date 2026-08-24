@@ -68,7 +68,7 @@ export default function ClubsAdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">To'garaklar va seksiyalar</h2>
-          <p className="mt-1 text-gray-500">Maktabdagi qo'shimcha ta'lim to'garaklarini boshqarish.</p>
+          <p className="mt-1 text-gray-500">Texnikumdagi qo'shimcha ta'lim to'garaklarini boshqarish.</p>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}

@@ -8,7 +8,7 @@ import { fadeUp, stagger, slideLeft, slideRight } from "@/lib/animations";
 
 const SUBJECTS = [
   "Umumiy savol",
-  "O'quvchini qabul qilish",
+  "Talabani qabul qilish",
   "Dars jadvali",
   "To'lov va hujjatlar",
   "O'qituvchi bilan bog'lanish",

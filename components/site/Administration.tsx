@@ -33,8 +33,8 @@ export default function Administration() {
           <span className="text-sm font-semibold uppercase tracking-wide text-primary">
             Rahbariyat
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-gray-900">Maktab ma'muriyati</h2>
-          <p className="mt-3 text-gray-500">Maktabimiz jamoasi va rahbariyati bilan tanishing</p>
+          <h2 className="mt-3 text-3xl font-bold text-gray-900">Texnikum ma'muriyati</h2>
+          <p className="mt-3 text-gray-500">Texnikumimiz jamoasi va rahbariyati bilan tanishing</p>
         </motion.div>
 
         <motion.div

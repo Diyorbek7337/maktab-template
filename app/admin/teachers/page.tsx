@@ -5,8 +5,9 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { getTeachers, addTeacher, deleteTeacher, type TeacherDoc } from "@/lib/firestore";
 import { schoolConfig } from "@/school.config";
 
-const SUBJECTS = ["Matematika", "Fizika", "Kimyo", "Biologiya", "Ingliz tili",
-  "Ona tili va adabiyot", "Tarix", "Geografiya", "Informatika", "Jismoniy tarbiya", "Musiqa", "Boshqa"];
+const SUBJECTS = ["Kompyuter tarmoqlari", "Buxgalteriya hisobi", "Tikuvchilik texnologiyasi",
+  "Avtomexanika", "Elektr ta'minoti", "Oshpazlik", "Sartaroshlik", "Qurilish ishlari",
+  "Matematika", "Ingliz tili", "Ona tili va adabiyot", "Informatika", "Jismoniy tarbiya", "Boshqa"];
 
 const blank = () => ({ name: "", subject: SUBJECTS[0], experience: 1, achievement: "", image: "" });
 

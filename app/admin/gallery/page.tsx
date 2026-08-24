@@ -57,7 +57,7 @@ export default function GalleryAdminPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Galereya</h2>
-        <p className="mt-1 text-gray-500">Maktab hayotiga oid rasmlar. Bir vaqtda bir nechta rasm yuklash mumkin.</p>
+        <p className="mt-1 text-gray-500">Texnikum hayotiga oid rasmlar. Bir vaqtda bir nechta rasm yuklash mumkin.</p>
       </div>
 
       {/* Yuklash paneli */}

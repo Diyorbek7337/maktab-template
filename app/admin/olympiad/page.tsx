@@ -5,14 +5,14 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { getWinners, addWinner, deleteWinner, type WinnerDoc } from "@/lib/firestore";
 import { schoolConfig, type OlympiadLevel, type OlympiadPlace } from "@/school.config";
 
-const LEVELS: OlympiadLevel[] = ["Maktab", "Tuman", "Viloyat", "Respublika", "Xalqaro"];
+const LEVELS: OlympiadLevel[] = ["Texnikum", "Tuman", "Viloyat", "Respublika", "Xalqaro"];
 const PLACES: OlympiadPlace[] = [1, 2, 3];
-const SUBJECTS = ["Matematika", "Fizika", "Kimyo", "Biologiya", "Ingliz tili",
-  "Ona tili", "Tarix", "Geografiya", "Informatika", "Rus tili", "Boshqa"];
+const SUBJECTS = ["Kompyuter tarmoqlari", "Buxgalteriya hisobi", "Tikuvchilik texnologiyasi",
+  "Avtomexanika", "Elektr montaj ishlari", "Oshpazlik mahorati", "Matematika", "Ingliz tili", "Boshqa"];
 
 const medalLabel: Record<OlympiadPlace, string> = { 1: "🥇 I o'rin", 2: "🥈 II o'rin", 3: "🥉 III o'rin" };
 const levelColor: Record<OlympiadLevel, string> = {
-  Maktab: "text-gray-500", Tuman: "text-blue-600",
+  Texnikum: "text-gray-500", Tuman: "text-blue-600",
   Viloyat: "text-violet-600", Respublika: "text-green-700", Xalqaro: "text-amber-700",
 };
 
@@ -72,8 +72,8 @@ export default function OlympiadAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Olimpiada g'oliblari</h2>
-        <p className="mt-1 text-gray-500">Fan olimpiadasi g'oliblarini qo'shing va boshqaring.</p>
+        <h2 className="text-2xl font-bold text-gray-900">Musobaqa g'oliblari</h2>
+        <p className="mt-1 text-gray-500">Fan olimpiadasi va kasbiy mahorat musobaqasi g'oliblarini qo'shing va boshqaring.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
@@ -84,10 +84,10 @@ export default function OlympiadAdminPage() {
             value={form.image}
             onChange={(url) => setForm((f) => ({ ...f, image: url }))}
             folder="olympiad"
-            label="O'quvchi rasmi (ixtiyoriy)"
+            label="Talaba rasmi (ixtiyoriy)"
           />
 
-          <Field label="O'quvchi ismi">
+          <Field label="Talaba ismi">
             <input
               value={form.student}
               onChange={(e) => setForm((f) => ({ ...f, student: e.target.value }))}

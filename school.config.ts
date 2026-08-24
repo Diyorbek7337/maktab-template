@@ -1,6 +1,6 @@
 // ============================================
-// MAKTAB KONFIGURATSIYASI
-// Yangi maktabga sotganda FAQAT shu fayldagi
+// TEXNIKUM KONFIGURATSIYASI
+// Yangi kasb-hunar texnikumiga sotganda FAQAT shu fayldagi
 // qiymatlarni o'zgartiring va xostingga yuklang.
 // Nom, manzil, telefon, direktor, havolalar VA rang —
 // hammasi shu yerdan butun saytga (va admin panelga) tarqaladi.
@@ -39,7 +39,7 @@ export interface Teacher {
   image?: string;
 }
 
-export type OlympiadLevel = "Maktab" | "Tuman" | "Viloyat" | "Respublika" | "Xalqaro";
+export type OlympiadLevel = "Texnikum" | "Tuman" | "Viloyat" | "Respublika" | "Xalqaro";
 export type OlympiadPlace = 1 | 2 | 3;
 
 export interface OlympiadWinner {
@@ -72,6 +72,14 @@ export interface Club {
   image?: string;
 }
 
+export interface Major {
+  name: string;         // "Kompyuter tarmoqlari va tizimlari"
+  duration: string;     // "2 yil 10 oy"
+  qualification: string; // beriladigan malaka: "Tarmoq muhandisi yordamchisi"
+  description: string;
+  image?: string;
+}
+
 export interface SchoolTheme {
   primary: string; // asosiy rang (HEX), masalan "#2563eb"
   primaryHover: string; // hover rangi (HEX)
@@ -79,7 +87,7 @@ export interface SchoolTheme {
 
 export interface SchoolStat {
   value: string; // "1200+"
-  label: string; // "O'quvchilar"
+  label: string; // "Talabalar"
 }
 
 export interface SchoolConfig {
@@ -88,8 +96,8 @@ export interface SchoolConfig {
   name: string;
   shortName: string;
   slogan: string;
-  logo?: string;        // maktab gerbi yoki logotipi: "/gerb.png"
-  schoolImage?: string; // maktab binosi rasmi URL
+  logo?: string;        // texnikum gerbi yoki logotipi: "/gerb.png"
+  schoolImage?: string; // texnikum binosi rasmi URL
 
   // --- Aloqa ---
   address: string;
@@ -110,13 +118,16 @@ export interface SchoolConfig {
   // --- Sahifa raqamlari ---
   stats: SchoolStat[];
 
-  // --- Maktab tarixi ---
+  // --- Texnikum tarixi ---
   history: HistoryEvent[];
+
+  // --- Kasb-hunar yo'nalishlari ---
+  majors: Major[];
 
   // --- Eng yaxshi o'qituvchilar ---
   teachers: Teacher[];
 
-  // --- Olimpiada g'oliblari ---
+  // --- Olimpiada va kasbiy mahorat musobaqalari g'oliblari ---
   olympiadWinners: OlympiadWinner[];
 
   // --- To'garaklar va seksiyalar ---
@@ -127,6 +138,8 @@ export interface SchoolConfig {
 
   // --- Foydali manbalar ---
   usefulLinks: UsefulLink[];
+
+  // --- Admin panel paroli endi ADMIN_PASSWORD env o'zgaruvchisida (.env.local) ---
 
   // --- Telegram bildirishnoma (xabar yuborilganda) ---
   telegramNotify?: {
@@ -143,32 +156,32 @@ export interface SchoolConfig {
 }
 
 // ============================================
-// QIYMATLAR — har bir maktab uchun shu yerni tahrirlang
+// QIYMATLAR — har bir texnikum uchun shu yerni tahrirlang
 // ============================================
 
 export const schoolConfig: SchoolConfig = {
-  number: "15",
-  name: "Sho'rchi tumani 15-umumiy o'rta ta'lim maktabi",
-  shortName: "15-maktab",
-  slogan: "Bilim — kelajak kaliti. Har bir o'quvchining muvaffaqiyati uchun.",
-  logo: "/gerb.png", // maktab gerbi — public/gerb.png fayliga qo'ying
-  schoolImage: "", // maktab binosi rasmi: "/school.jpg" yoki tashqi URL
+  number: "1",
+  name: "Sho'rchi tumani 1-son kasb-hunar texnikumi",
+  shortName: "1-KHT",
+  slogan: "Kasb — kelajak kaliti. Har bir talabaning muvaffaqiyati uchun.",
+  logo: "/gerb.png", // texnikum gerbi — public/gerb.png fayliga qo'ying
+  schoolImage: "", // texnikum binosi rasmi: "/school.jpg" yoki tashqi URL
 
   address: "Surxondaryo viloyati, Sho'rchi tumani, Mustaqillik ko'chasi, 1-uy",
   phones: ["+998 90 123 45 67", "+998 91 234 56 78"],
-  email: "info@maktab15.uz",
+  email: "info@texnikum1.uz",
   workingHours: "Dushanba–Shanba, 08:00–18:00",
 
   director: {
     name: "Aliyev Vali Akramovich",
-    position: "Maktab direktori",
+    position: "Texnikum direktori",
     quote:
-      "Maktabimiz eshigi har bir bola uchun ochiq. Biz nafaqat bilim beramiz, balki kelajak fuqarolarini tarbiyalaymiz.",
+      "Texnikumimiz eshigi har bir yoshga ochiq. Biz nazariy bilim bilan birga amaliy kasb-mahorat beramiz — bitiruvchilarimiz ish bozorida talab qilinadi.",
   },
 
   administration: [
     { name: "Aliyev Vali Akramovich", position: "Direktor" },
-    { name: "Karimova Nilufar Hasanovna", position: "O'quv ishlari bo'yicha direktor o'rinbosari" },
+    { name: "Karimova Nilufar Hasanovna", position: "O'quv-ishlab chiqarish ishlari bo'yicha direktor o'rinbosari" },
     { name: "Tursunov Bobur Salimovich", position: "Tarbiya ishlari bo'yicha direktor o'rinbosari" },
     { name: "Yusupova Sarvinoz Mirzaevna", position: "Bosh buxgalter" },
     { name: "Qodirov Anvar Behruzovich", position: "Xo'jalik mudiri" },
@@ -176,37 +189,37 @@ export const schoolConfig: SchoolConfig = {
   ],
 
   stats: [
-    { value: "1200+", label: "O'quvchilar" },
+    { value: "1200+", label: "Talabalar" },
     { value: "85", label: "O'qituvchilar" },
-    { value: "40", label: "Sinflar" },
+    { value: "12", label: "Yo'nalishlar" },
     { value: "30+", label: "Yillik tajriba" },
   ],
 
   history: [
     {
       year: 1995,
-      title: "Maktab tashkil etildi",
-      description: "Sho'rchi tumanida 15-umumiy o'rta ta'lim maktabi rasman ochildi. Dastlabki yili 480 nafar o'quvchi ta'lim oldi.",
+      title: "Texnikum tashkil etildi",
+      description: "Sho'rchi tumanida 1-son kasb-hunar texnikumi rasman ochildi. Dastlabki yili 480 nafar talaba ta'lim oldi.",
     },
     {
       year: 2001,
-      title: "Yangi o'quv binosi qurildi",
-      description: "3 qavatli zamonaviy o'quv binosi ishga tushirildi, o'quvchilar soni 800 nafardan oshdi.",
+      title: "Yangi o'quv-ishlab chiqarish binosi qurildi",
+      description: "3 qavatli zamonaviy o'quv binosi va ustaxonalar ishga tushirildi, talabalar soni 800 nafardan oshdi.",
     },
     {
       year: 2008,
       title: "Kompyuter sinfi ochildi",
-      description: "Birinchi kompyuter sinfi jihozlandi va informatika fani o'quv dasturiga kiritildi.",
+      description: "Birinchi kompyuter sinfi jihozlandi va axborot texnologiyalari yo'nalishi tashkil etildi.",
     },
     {
       year: 2015,
       title: "Viloyat ko'rik-tanlovida g'olib",
-      description: "Maktabimiz \"Yilning eng yaxshi maktabi\" tanlovida viloyat bosqichida birinchi o'rinni egalladi.",
+      description: "Texnikumimiz \"Yilning eng yaxshi kasb-hunar texnikumi\" tanlovida viloyat bosqichida birinchi o'rinni egalladi.",
     },
     {
       year: 2019,
-      title: "Zamonaviy laboratoriyalar",
-      description: "Fizika, kimyo va biologiya fanlari uchun yangi jihozlangan laboratoriyalar o'quvchilarga topshirildi.",
+      title: "Zamonaviy ustaxonalar",
+      description: "Elektr-texnika, tikuvchilik va avtomexanika yo'nalishlari uchun yangi jihozlangan ustaxonalar talabalarga topshirildi.",
     },
     {
       year: 2023,
@@ -215,10 +228,61 @@ export const schoolConfig: SchoolConfig = {
     },
   ],
 
+  majors: [
+    {
+      name: "Kompyuter tarmoqlari va tizimlari",
+      duration: "2 yil 10 oy",
+      qualification: "Tarmoq muhandisi yordamchisi",
+      description: "Kompyuter tarmoqlarini o'rnatish va sozlash, tizim ma'muriyati, veb-dasturlash asoslari.",
+    },
+    {
+      name: "Buxgalteriya hisobi va audit",
+      duration: "2 yil 10 oy",
+      qualification: "Buxgalter yordamchisi",
+      description: "Moliyaviy hisobot, 1C dasturi, soliq hisob-kitobi va audit asoslari.",
+    },
+    {
+      name: "Tikuvchilik ishlab chiqarish texnologiyasi",
+      duration: "1 yil 10 oy",
+      qualification: "Tikuvchi-texnolog",
+      description: "Kiyim-kechak konstruksiyasi, tikuv mashinalarida ishlash, zamonaviy modellashtirish.",
+    },
+    {
+      name: "Avtomobillarga texnik xizmat ko'rsatish va ta'mirlash",
+      duration: "2 yil 10 oy",
+      qualification: "Avtomexanik",
+      description: "Zamonaviy avtomobil diagnostikasi, dvigatel va elektr jihozlarini ta'mirlash.",
+    },
+    {
+      name: "Elektr ta'minoti tizimlari",
+      duration: "2 yil 10 oy",
+      qualification: "Elektrik-montyor",
+      description: "Elektr tarmoqlarini o'rnatish, xavfsizlik texnikasi, sanoat va maishiy elektr jihozlari.",
+    },
+    {
+      name: "Oshpazlik va restoran xizmati",
+      duration: "1 yil 10 oy",
+      qualification: "Oshpaz",
+      description: "Milliy va jahon oshxonasi taomlari, oshxona sanitariyasi, restoran xizmat ko'rsatish madaniyati.",
+    },
+    {
+      name: "Sartaroshlik va go'zallik xizmati",
+      duration: "1 yil 10 oy",
+      qualification: "Sartarosh-stilist",
+      description: "Zamonaviy soch turmagi, bo'yash texnikalari, mijozlar bilan ishlash madaniyati.",
+    },
+    {
+      name: "Qurilish va ta'mirlash ishlari",
+      duration: "2 yil 10 oy",
+      qualification: "Qurilish ustasi",
+      description: "Bino qurilishi asoslari, ichki-tashqi pardozlash ishlari, zamonaviy qurilish materiallari.",
+    },
+  ],
+
   teachers: [
     {
       name: "Karimova Nilufar Hasanovna",
-      subject: "Matematika",
+      subject: "Kompyuter tarmoqlari",
       experience: 18,
       achievement: "O'zbekiston Respublikasi xalq ta'limi a'lochisi",
     },
@@ -230,77 +294,77 @@ export const schoolConfig: SchoolConfig = {
     },
     {
       name: "Tursunov Bobur Salimovich",
-      subject: "Fizika",
+      subject: "Avtomexanika",
       experience: 15,
-      achievement: "\"Yilning eng yaxshi o'qituvchisi\" 2023",
+      achievement: "\"Yilning eng yaxshi ustoz-murabbiysi\" 2023",
     },
     {
       name: "Hamidova Zulfiya Rahimovna",
-      subject: "Biologiya",
+      subject: "Buxgalteriya hisobi",
       experience: 10,
       achievement: "Respublika metodist o'qituvchisi",
     },
     {
       name: "Olimov Farhodjon Hamidovich",
-      subject: "Kimyo",
+      subject: "Elektr ta'minoti",
       experience: 14,
-      achievement: "Viloyat olimpiadasida 3 marta g'oliblar tayyorlagan",
+      achievement: "Kasbiy mahorat musobaqalarida 3 marta g'oliblar tayyorlagan",
     },
     {
       name: "Sodiqova Malika Norqo'zievna",
-      subject: "Ona tili va adabiyot",
+      subject: "Tikuvchilik texnologiyasi",
       experience: 20,
       achievement: "O'zbekiston Respublikasi Faxriy o'qituvchisi",
     },
   ],
 
   olympiadWinners: [
-    { student: "Rahimov Jasur", subject: "Matematika", level: "Respublika", place: 1, year: 2026, teacher: "Karimova N." },
+    { student: "Rahimov Jasur", subject: "Veb-dasturlash", level: "Respublika", place: 1, year: 2026, teacher: "Karimova N." },
     { student: "Yusupova Kamola", subject: "Ingliz tili", level: "Viloyat", place: 1, year: 2026, teacher: "Ahmedova D." },
-    { student: "Normatov Sherzod", subject: "Fizika", level: "Viloyat", place: 2, year: 2025, teacher: "Tursunov B." },
-    { student: "Abdullayeva Nилуфар", subject: "Biologiya", level: "Tuman", place: 1, year: 2026, teacher: "Hamidova Z." },
-    { student: "Xoliqov Doniyor", subject: "Kimyo", level: "Viloyat", place: 3, year: 2025, teacher: "Olimov F." },
-    { student: "Mirzayeva Sarvinoz", subject: "Ona tili", level: "Respublika", place: 2, year: 2024, teacher: "Sodiqova M." },
-    { student: "Toshmatov Ulug'bek", subject: "Informatika", level: "Xalqaro", place: 3, year: 2024 },
-    { student: "Qodirov Asilbek", subject: "Tarix", level: "Viloyat", place: 1, year: 2025 },
+    { student: "Normatov Sherzod", subject: "Avtomexanika", level: "Viloyat", place: 2, year: 2025, teacher: "Tursunov B." },
+    { student: "Abdullayeva Nилуфар", subject: "Buxgalteriya hisobi", level: "Tuman", place: 1, year: 2026, teacher: "Hamidova Z." },
+    { student: "Xoliqov Doniyor", subject: "Elektr montaj ishlari", level: "Viloyat", place: 3, year: 2025, teacher: "Olimov F." },
+    { student: "Mirzayeva Sarvinoz", subject: "Tikuvchilik texnologiyasi", level: "Respublika", place: 2, year: 2024, teacher: "Sodiqova M." },
+    { student: "Toshmatov Ulug'bek", subject: "Kompyuter tarmoqlari", level: "Xalqaro", place: 3, year: 2024 },
+    { student: "Qodirov Asilbek", subject: "Oshpazlik mahorati", level: "Viloyat", place: 1, year: 2025 },
   ],
 
   alumni: [
     {
       name: "Karimov Sherzod",
       graduationYear: 2010,
-      achievement: "Toshkent davlat texnika universiteti, muhandis",
-      workplace: "\"Uzbekneftegaz\" MJ",
+      achievement: "Tarmoq muhandisi bo'lib ishga joylashdi, keyinchalik Toshkent axborot texnologiyalari universitetini sirtqi tugatdi",
+      workplace: "\"Uzbektelekom\" AJ",
     },
     {
       name: "Nazarova Dilnoza",
       graduationYear: 2014,
-      achievement: "Toshkent tibbiyot akademiyasi, shifokor",
-      workplace: "Surxondaryo viloyat klinik kasalxonasi",
+      achievement: "Buxgalteriya yo'nalishini tugatgan, hozirda bosh buxgalter",
+      workplace: "Surxondaryo viloyat sanoat korxonasi",
     },
     {
       name: "Toshmatov Bobur",
       graduationYear: 2016,
-      achievement: "Respublika matematika olimpiadasi g'olibi, IT mutaxassisi",
+      achievement: "Kompyuter tarmoqlari yo'nalishi bitiruvchisi, IT mutaxassisi",
       workplace: "IT Park Tashkent",
     },
     {
       name: "Yusupova Maftuna",
       graduationYear: 2018,
-      achievement: "O'zbekiston Milliy universiteti, huquqshunos",
-      workplace: "Surxondaryo viloyat prokuraturasi",
+      achievement: "Tikuvchilik texnologiyasini tugatgan, o'z tikuv atelyesini ochgan tadbirkor",
+      workplace: "\"Maftuna Style\" atelye",
     },
     {
       name: "Qodirov Asilbek",
       graduationYear: 2020,
-      achievement: "INHA universiteti, iqtisodchi",
-      workplace: "Xalqaro Moliya korporatsiyasi",
+      achievement: "Avtomexanika yo'nalishi bitiruvchisi, ustaxona rahbari",
+      workplace: "\"AvtoService Plus\" MChJ",
     },
     {
       name: "Rahimova Sarvinoz",
       graduationYear: 2022,
-      achievement: "Westminster universiteti O'zbekistonda, marketing mutaxassisi",
-      workplace: "Buyuk Ipak Yo'li Travel",
+      achievement: "Oshpazlik yo'nalishini a'lo baholarga tugatgan, restoran oshxonasi boshlig'i",
+      workplace: "Buyuk Ipak Yo'li mehmonxonasi",
     },
   ],
 
@@ -323,7 +387,7 @@ export const schoolConfig: SchoolConfig = {
     },
     {
       name: "Mini futbol",
-      description: "Maktab chempionati va tuman musobaqalariga tayyorgarlik ko'rish, jamoaviy o'yin madaniyati.",
+      description: "Texnikum chempionati va tuman musobaqalariga tayyorgarlik ko'rish, jamoaviy o'yin madaniyati.",
       category: "Sport",
       teacher: "Razzaqov Sanjar",
       schedule: "Har kuni 16:00–18:00",
@@ -331,15 +395,15 @@ export const schoolConfig: SchoolConfig = {
     },
     {
       name: "Rasm to'garagi",
-      description: "Suvli bo'yoq, qalam va raqamli rasm chizish. Maktab ko'rik-tanlovlariga ishtirok.",
+      description: "Suvli bo'yoq, qalam va raqamli rasm chizish. Texnikum ko'rik-tanlovlariga ishtirok.",
       category: "San'at",
       teacher: "Nazarova Gulnora",
       schedule: "Juma, Shanba 14:00–16:00",
       capacity: 15,
     },
     {
-      name: "Matematika olimpiadasi",
-      description: "Tuman, viloyat va respublika olimpiadalariga chuqur tayyorgarlik ko'rish.",
+      name: "Tadbirkorlik asoslari",
+      description: "O'z biznesini boshlash, moliyaviy savodxonlik va startap g'oyalarini rivojlantirish.",
       category: "Fan",
       teacher: "Karimova Nilufar",
       schedule: "Seshanba, Juma 15:00–17:00",
@@ -347,7 +411,7 @@ export const schoolConfig: SchoolConfig = {
     },
     {
       name: "Voleybol",
-      description: "Qizlar va o'g'il bolalar uchun voleybol musobaqa va mashg'ulotlari.",
+      description: "Qizlar va yigitlar uchun voleybol musobaqa va mashg'ulotlari.",
       category: "Sport",
       teacher: "Ibragimova Mohira",
       schedule: "Dushanba, Chorshanba, Juma 15:30–17:30",
@@ -362,19 +426,9 @@ export const schoolConfig: SchoolConfig = {
       logo: "https://president.uz/favicon.ico",
     },
     {
-      title: "O'zbekiston Respublikasi Xalq ta'lim vazirligi rasmiy sayti",
-      url: "https://uzedu.uz",
-      logo: "https://uzedu.uz/favicon.ico",
-    },
-    {
       title: "Yagona interaktiv davlat xizmatlari portali",
       url: "https://my.gov.uz",
       logo: "https://my.gov.uz/favicon.ico",
-    },
-    {
-      title: "Maktab ta'limi jurnali",
-      url: "https://maktab.uz",
-      logo: "https://maktab.uz/favicon.ico",
     },
     {
       title: "Edu.uz — ta'lim portali",
@@ -384,10 +438,10 @@ export const schoolConfig: SchoolConfig = {
   ],
 
   social: {
-    telegram: "https://t.me/maktab15",
-    instagram: "https://instagram.com/maktab15",
-    facebook: "https://facebook.com/maktab15",
-    youtube: "https://youtube.com/@maktab15",
+    telegram: "https://t.me/texnikum1",
+    instagram: "https://instagram.com/texnikum1",
+    facebook: "https://facebook.com/texnikum1",
+    youtube: "https://youtube.com/@texnikum1",
   },
 
   mapEmbedUrl: "",

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { schoolConfig } from "@/school.config";
-import { getMessages, getTeachers, getClubs, getAlumni, getWinners, getGallery } from "@/lib/firestore";
+import { getMessages, getTeachers, getClubs, getAlumni, getWinners, getGallery, getMajors } from "@/lib/firestore";
 
 interface StatCard {
   label: string;
@@ -47,9 +47,16 @@ const iconAlumni = (
     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
+const iconMajor = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+    <rect width="20" height="14" x="2" y="7" rx="2" />
+    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+  </svg>
+);
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
+    majors: "—",
     teachers: "—",
     unreadMessages: "—",
     gallery: "—",
@@ -61,13 +68,15 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     Promise.allSettled([
+      getMajors(),
       getTeachers(),
       getMessages(),
       getGallery(),
       getClubs(),
       getWinners(),
       getAlumni(),
-    ]).then(([teachers, messages, gallery, clubs, winners, alumni]) => {
+    ]).then(([majors, teachers, messages, gallery, clubs, winners, alumni]) => {
+      const majorCount = majors.status === "fulfilled" ? majors.value.length : schoolConfig.majors.length;
       const teacherCount = teachers.status === "fulfilled" ? teachers.value.length : schoolConfig.teachers.length;
       const unread = messages.status === "fulfilled" ? messages.value.filter((m) => !m.read).length : 0;
       const galleryCount = gallery.status === "fulfilled" ? gallery.value.length : 0;
@@ -76,6 +85,7 @@ export default function AdminDashboard() {
       const alumniCount = alumni.status === "fulfilled" ? alumni.value.length : schoolConfig.alumni.length;
 
       setStats({
+        majors: String(majorCount),
         teachers: String(teacherCount),
         unreadMessages: unread > 0 ? `${unread} yangi` : "0",
         gallery: String(galleryCount),
@@ -88,11 +98,12 @@ export default function AdminDashboard() {
   }, []);
 
   const cards: StatCard[] = [
+    { label: "Yo'nalishlar",     value: stats.majors,         hint: "jami mutaxassislik", href: "/admin/majors",   icon: iconMajor   },
     { label: "O'qituvchilar",    value: stats.teachers,       hint: "jami pedagog",       href: "/admin/teachers", icon: iconTeacher },
     { label: "Xabarlar",         value: stats.unreadMessages, hint: "o'qilmagan",         href: "/admin/messages", icon: iconInbox   },
     { label: "Galereya rasmlari",value: stats.gallery,        hint: "jami yuklangan",     href: "/admin/gallery",  icon: iconGallery },
     { label: "To'garaklar",      value: stats.clubs,          hint: "faol seksiyalar",    href: "/admin/clubs",    icon: iconClub    },
-    { label: "Olimpiada g'oliblar", value: stats.winners,     hint: "jami g'oliblar",     href: "/admin/olympiad", icon: iconMedal   },
+    { label: "Musobaqa g'oliblari", value: stats.winners,     hint: "jami g'oliblar",     href: "/admin/olympiad", icon: iconMedal   },
     { label: "Bitiruvchilar",    value: stats.alumni,         hint: "qayd etilgan",       href: "/admin/alumni",   icon: iconAlumni  },
   ];
 
@@ -134,6 +145,12 @@ export default function AdminDashboard() {
             className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
           >
             + Yangilik qo'shish
+          </Link>
+          <Link
+            href="/admin/majors"
+            className="rounded-lg border-2 border-primary px-5 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            + Yo'nalish qo'shish
           </Link>
           <Link
             href="/admin/schedule"

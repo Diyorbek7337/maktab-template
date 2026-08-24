@@ -33,7 +33,7 @@ export default function Teachers() {
           </span>
           <h2 className="mt-3 text-3xl font-bold text-gray-900">Eng yaxshi o'qituvchilar</h2>
           <p className="mt-3 text-gray-500">
-            Maktabimizning yutuqli va tajribali pedagog jamoasi
+            Texnikumimizning yutuqli va tajribali pedagog jamoasi
           </p>
         </motion.div>
 

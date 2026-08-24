@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 import Hero from "@/components/site/Hero";
 import About from "@/components/site/About";
+import Majors from "@/components/site/Majors";
 import History from "@/components/site/History";
 import Administration from "@/components/site/Administration";
 import Teachers from "@/components/site/Teachers";
@@ -32,6 +33,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <About />
+        <Majors />
         <History />
         <Administration />
         <Teachers />

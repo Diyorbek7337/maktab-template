@@ -4,7 +4,7 @@ import {
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "./firebase";
-import type { Teacher, OlympiadWinner, StaffMember, Club, Alumni } from "@/school.config";
+import type { Teacher, OlympiadWinner, StaffMember, Club, Alumni, Major } from "@/school.config";
 
 // Firestore yozuvi bilan birga undagi Storage rasmini ham o'chiradi.
 // URL bo'lmasa yoki fayl allaqachon yo'q bo'lsa jim o'tkazib yuboriladi.
@@ -136,6 +136,24 @@ export async function addClub(data: Club): Promise<string> {
 
 export async function deleteClub(id: string, image?: string): Promise<void> {
   await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "clubs", id))]);
+}
+
+// ── Kasb-hunar yo'nalishlari ────────────────────────────────────
+export type MajorDoc = Major & { id: string };
+
+export async function getMajors(): Promise<MajorDoc[]> {
+  const q = query(collection(db, "majors"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Major) }));
+}
+
+export async function addMajor(data: Major): Promise<string> {
+  const ref = await addDoc(collection(db, "majors"), { ...data, createdAt: serverTimestamp() });
+  return ref.id;
+}
+
+export async function deleteMajor(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "majors", id))]);
 }
 
 // ── Olimpiada g'oliblari ──────────────────────────────────────

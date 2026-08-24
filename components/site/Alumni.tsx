@@ -36,7 +36,7 @@ export default function AlumniSection() {
           className="mb-12"
         >
           <span className="text-sm font-semibold uppercase tracking-wide text-primary">
-            Maktab faxrlari
+            Texnikum faxrlari
           </span>
           <h2 className="mt-3 text-3xl font-bold text-gray-900">Bitiruvchilar</h2>
           <p className="mt-2 text-gray-500 max-w-xl">

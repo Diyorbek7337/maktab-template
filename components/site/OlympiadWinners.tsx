@@ -15,7 +15,7 @@ const medalConfig = {
 } as const;
 
 const levelBadge: Record<OlympiadLevel, string> = {
-  Maktab:      "bg-gray-100 text-gray-600",
+  Texnikum:    "bg-gray-100 text-gray-600",
   Tuman:       "bg-blue-50 text-blue-600",
   Viloyat:     "bg-violet-50 text-violet-600",
   Respublika:  "bg-green-50 text-green-700",
@@ -38,8 +38,8 @@ export default function OlympiadWinners() {
     ? olympiadWinners
     : olympiadWinners.filter((w) => w.level === activeLevel);
 
-  // Darajaga qarab saralash: Xalqaro > Respublika > Viloyat > Tuman > Maktab
-  const levelOrder: Record<OlympiadLevel, number> = { Xalqaro: 0, Respublika: 1, Viloyat: 2, Tuman: 3, Maktab: 4 };
+  // Darajaga qarab saralash: Xalqaro > Respublika > Viloyat > Tuman > Texnikum
+  const levelOrder: Record<OlympiadLevel, number> = { Xalqaro: 0, Respublika: 1, Viloyat: 2, Tuman: 3, Texnikum: 4 };
   const sorted = [...filtered].sort((a, b) =>
     levelOrder[a.level] - levelOrder[b.level] || a.place - b.place
   );
@@ -60,9 +60,9 @@ export default function OlympiadWinners() {
           <span className="text-sm font-semibold uppercase tracking-wide text-primary">
             Yutuqlar
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-gray-900">Olimpiada g'oliblari</h2>
+          <h2 className="mt-3 text-3xl font-bold text-gray-900">Musobaqa g'oliblari</h2>
           <p className="mt-3 text-gray-500">
-            Fan olimpiadalarida maktabimizni munosib vakil etgan o'quvchilar
+            Fan olimpiadalari va kasbiy mahorat musobaqalarida texnikumimizni munosib vakil etgan talabalar
           </p>
         </motion.div>
 
@@ -121,7 +121,7 @@ export default function OlympiadWinners() {
                       </span>
                     </div>
 
-                    {/* O'quvchi rasmi + ismi */}
+                    {/* Talaba rasmi + ismi */}
                     <div className="mt-3 flex items-center gap-3">
                       {winner.image ? (
                         // eslint-disable-next-line @next/next/no-img-element

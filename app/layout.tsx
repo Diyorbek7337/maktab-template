@@ -13,9 +13,9 @@ export const metadata: Metadata = {
   keywords: [
     schoolConfig.shortName,
     schoolConfig.name,
-    "maktab",
-    "ta'lim",
-    "umumiy o'rta ta'lim",
+    "kasb-hunar texnikumi",
+    "kasb-hunar ta'limi",
+    "texnikum",
     "Surxondaryo",
     "Sho'rchi tumani",
   ],

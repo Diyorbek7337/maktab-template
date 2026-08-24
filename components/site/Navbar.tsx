@@ -7,11 +7,12 @@ import { usePathname } from "next/navigation";
 import { schoolConfig } from "@/school.config";
 
 const navLinks = [
-  { href: "#hero",      label: "Bosh sahifa",   type: "hash" },
-  { href: "#about",     label: "Maktab haqida", type: "hash" },
-  { href: "/mamuriyat", label: "Ma'muriyat",    type: "page" },
-  { href: "/news",      label: "Yangiliklar",   type: "page" },
-  { href: "#contact",   label: "Aloqa",         type: "hash" },
+  { href: "#hero",      label: "Bosh sahifa",     type: "hash" },
+  { href: "#about",     label: "Texnikum haqida", type: "hash" },
+  { href: "#majors",    label: "Yo'nalishlar",    type: "hash" },
+  { href: "/mamuriyat", label: "Ma'muriyat",      type: "page" },
+  { href: "/news",      label: "Yangiliklar",     type: "page" },
+  { href: "#contact",   label: "Aloqa",           type: "hash" },
 ] as const;
 
 export default function Navbar() {
