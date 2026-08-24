@@ -63,9 +63,9 @@ export default function OlympiadAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (!confirm("G'olibni ro'yxatdan o'chirishni tasdiqlaysizmi?")) return;
-    await deleteWinner(id).catch(() => {});
+    await deleteWinner(id, image).catch(() => {});
     setWinners((prev) => prev.filter((w) => w.id !== id));
   }
 
@@ -178,7 +178,7 @@ export default function OlympiadAdminPage() {
                 {w.teacher && <p className="mt-1 text-xs text-gray-400">O'qituvchi: {w.teacher}</p>}
               </div>
               <button
-                onClick={() => handleDelete(w.id)}
+                onClick={() => handleDelete(w.id, w.image)}
                 className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors"
               >
                 O'chirish

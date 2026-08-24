@@ -126,12 +126,12 @@ export default function NewsAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (!confirm("Yangiliklarni o'chirishni tasdiqlaysizmi?")) return;
     // initialNews dan kelgan yozuvlar (raqamli ID) o'chirilmaydi
     const isStatic = initialNews.some((n) => String(n.id) === id);
     if (isStatic) { alert("Namuna yangiliklar o'chirilmaydi. Firestore'ga o'z yangiliklaringizni qo'shing."); return; }
-    await deleteNews(id).catch(() => {});
+    await deleteNews(id, image).catch(() => {});
     setNews((prev) => prev.filter((n) => n.id !== id));
   }
 
@@ -222,7 +222,7 @@ export default function NewsAdminPage() {
                   <time className="mt-1 block text-xs text-gray-400">{formatDateUz(item.date)}</time>
                 </div>
               </div>
-              <button onClick={() => handleDelete(item.id)}
+              <button onClick={() => handleDelete(item.id, item.image)}
                 className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors">
                 O'chirish
               </button>

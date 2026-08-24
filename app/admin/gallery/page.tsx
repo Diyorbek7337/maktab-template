@@ -45,9 +45,9 @@ export default function GalleryAdminPage() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, url: string) {
     if (!confirm("Rasmni o'chirishni tasdiqlaysizmi?")) return;
-    await deleteGalleryItem(id).catch(() => {});
+    await deleteGalleryItem(id, url).catch(() => {});
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
@@ -111,7 +111,7 @@ export default function GalleryAdminPage() {
               <div className="absolute inset-0 flex flex-col justify-between bg-black/0 p-2 transition-all group-hover:bg-black/40">
                 <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDelete(item.id, item.url)}
                     className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white text-xs shadow"
                   >
                     ✕

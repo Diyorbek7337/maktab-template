@@ -57,9 +57,9 @@ export default function ClubsAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (!confirm("O'chirishni tasdiqlaysizmi?")) return;
-    await deleteClub(id).catch(() => {});
+    await deleteClub(id, image).catch(() => {});
     setClubs((prev) => prev.filter((c) => c.id !== id));
   }
 
@@ -183,7 +183,7 @@ export default function ClubsAdminPage() {
                   </span>
                 </div>
                 <button
-                  onClick={() => handleDelete(club.id)}
+                  onClick={() => handleDelete(club.id, club.image)}
                   className="shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

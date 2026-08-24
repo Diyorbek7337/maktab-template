@@ -48,9 +48,9 @@ export default function AlumniAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (!confirm("O'chirishni tasdiqlaysizmi?")) return;
-    await deleteAlumni(id).catch(() => {});
+    await deleteAlumni(id, image).catch(() => {});
     setAlumni((prev) => prev.filter((a) => a.id !== id));
   }
 
@@ -166,7 +166,7 @@ export default function AlumniAdminPage() {
                     <p className="text-xs text-primary">{person.graduationYear}-yil bitiruvchisi</p>
                   </div>
                   <button
-                    onClick={() => handleDelete(person.id)}
+                    onClick={() => handleDelete(person.id, person.image)}
                     className="shrink-0 rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

@@ -62,12 +62,12 @@ export default function AdministrationAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (id.startsWith("config-")) {
       setStaff((prev) => prev.filter((s) => s.id !== id));
       return;
     }
-    await deleteStaff(id).catch(() => {});
+    await deleteStaff(id, image).catch(() => {});
     setStaff((prev) => prev.filter((s) => s.id !== id));
   }
 
@@ -194,7 +194,7 @@ export default function AdministrationAdminPage() {
               </svg>
 
               <button
-                onClick={() => handleDelete(member.id)}
+                onClick={() => handleDelete(member.id, member.image)}
                 className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors"
               >
                 O'chirish

@@ -51,9 +51,9 @@ export default function TeachersAdminPage() {
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, image?: string) {
     if (!confirm("O'qituvchini o'chirishni tasdiqlaysizmi?")) return;
-    await deleteTeacher(id).catch(() => {});
+    await deleteTeacher(id, image).catch(() => {});
     setTeachers((prev) => prev.filter((t) => t.id !== id));
   }
 
@@ -151,7 +151,7 @@ export default function TeachersAdminPage() {
                 {t.achievement && <p className="mt-1 truncate text-xs text-gray-400">{t.achievement}</p>}
               </div>
               <button
-                onClick={() => handleDelete(t.id)}
+                onClick={() => handleDelete(t.id, t.image)}
                 className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors"
               >
                 O'chirish

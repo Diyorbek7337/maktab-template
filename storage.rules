@@ -6,7 +6,10 @@ service firebase.storage {
     // admin (Firebase Auth custom token) yuklay/o'chira oladi.
     match /{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null
+      // delete'da request.resource mavjud emas — shuning uchun
+      // hajm/tur tekshiruvini faqat create/update uchun qo'llaymiz.
+      allow delete: if request.auth != null;
+      allow create, update: if request.auth != null
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches("image/.*");
     }

@@ -2,8 +2,20 @@ import {
   collection, addDoc, getDocs, deleteDoc, doc, setDoc,
   orderBy, query, serverTimestamp, updateDoc, Timestamp,
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { ref, deleteObject } from "firebase/storage";
+import { db, storage } from "./firebase";
 import type { Teacher, OlympiadWinner, StaffMember, Club, Alumni } from "@/school.config";
+
+// Firestore yozuvi bilan birga undagi Storage rasmini ham o'chiradi.
+// URL bo'lmasa yoki fayl allaqachon yo'q bo'lsa jim o'tkazib yuboriladi.
+async function deleteStorageFile(url?: string): Promise<void> {
+  if (!url || !url.includes("firebasestorage")) return;
+  try {
+    await deleteObject(ref(storage, url));
+  } catch {
+    // fayl topilmadi yoki allaqachon o'chirilgan — e'tiborsiz qoldiramiz
+  }
+}
 
 // ── Xabarlar ──────────────────────────────────────────────────
 export interface Message {
@@ -57,8 +69,8 @@ export async function addGalleryItem(data: Omit<GalleryItem, "id" | "createdAt">
   return ref.id;
 }
 
-export async function deleteGalleryItem(id: string): Promise<void> {
-  await deleteDoc(doc(db, "gallery", id));
+export async function deleteGalleryItem(id: string, url?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(url), deleteDoc(doc(db, "gallery", id))]);
 }
 
 // ── O'qituvchilar ─────────────────────────────────────────────
@@ -78,8 +90,8 @@ export async function addTeacher(data: Teacher): Promise<string> {
   return ref.id;
 }
 
-export async function deleteTeacher(id: string): Promise<void> {
-  await deleteDoc(doc(db, "teachers", id));
+export async function deleteTeacher(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "teachers", id))]);
 }
 
 // ── Rahbariyat ────────────────────────────────────────────────
@@ -104,8 +116,8 @@ export async function updateStaffOrder(id: string, order: number): Promise<void>
   await updateDoc(doc(db, "administration", id), { order });
 }
 
-export async function deleteStaff(id: string): Promise<void> {
-  await deleteDoc(doc(db, "administration", id));
+export async function deleteStaff(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "administration", id))]);
 }
 
 // ── To'garaklar ───────────────────────────────────────────────
@@ -122,8 +134,8 @@ export async function addClub(data: Club): Promise<string> {
   return ref.id;
 }
 
-export async function deleteClub(id: string): Promise<void> {
-  await deleteDoc(doc(db, "clubs", id));
+export async function deleteClub(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "clubs", id))]);
 }
 
 // ── Olimpiada g'oliblari ──────────────────────────────────────
@@ -143,8 +155,8 @@ export async function addWinner(data: OlympiadWinner): Promise<string> {
   return ref.id;
 }
 
-export async function deleteWinner(id: string): Promise<void> {
-  await deleteDoc(doc(db, "olympiadWinners", id));
+export async function deleteWinner(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "olympiadWinners", id))]);
 }
 
 // ── Bitiruvchilar ─────────────────────────────────────────────
@@ -161,8 +173,8 @@ export async function addAlumni(data: Alumni): Promise<string> {
   return ref.id;
 }
 
-export async function deleteAlumni(id: string): Promise<void> {
-  await deleteDoc(doc(db, "alumni", id));
+export async function deleteAlumni(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "alumni", id))]);
 }
 
 // ── Yangiliklar ───────────────────────────────────────────────
@@ -189,8 +201,8 @@ export async function addNews(data: Omit<NewsDoc, "id" | "createdAt">): Promise<
   return ref.id;
 }
 
-export async function deleteNews(id: string): Promise<void> {
-  await deleteDoc(doc(db, "news", id));
+export async function deleteNews(id: string, image?: string): Promise<void> {
+  await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "news", id))]);
 }
 
 // ── Dars jadvali ──────────────────────────────────────────────
