@@ -9,7 +9,7 @@ import { fadeUp, stagger } from "@/lib/animations";
 const quickLinks = [
   { href: "/", label: "Bosh sahifa" },
   { href: "#about", label: "Texnikum haqida" },
-  { href: "#majors", label: "Yo'nalishlar" },
+  { href: "/yonalishlar", label: "Yo'nalishlar" },
   { href: "/mamuriyat", label: "Ma'muriyat" },
   { href: "/news", label: "Yangiliklar" },
   { href: "#contact", label: "Aloqa" },

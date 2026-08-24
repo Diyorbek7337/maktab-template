@@ -78,7 +78,7 @@ export default function Hero() {
 
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-3">
             <a
-              href="#majors"
+              href="/yonalishlar"
               className="rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-hover transition-colors"
             >
               Yo'nalishlar

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { schoolConfig, type Major } from "@/school.config";
 import { getMajors, type MajorDoc } from "@/lib/firestore";
@@ -8,6 +9,8 @@ import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 import ImageWithSkeleton from "./ImageWithSkeleton";
 
 type MajorItem = Major | MajorDoc;
+
+const PREVIEW = 6;
 
 export default function Majors() {
   const [majors, setMajors] = useState<MajorItem[]>(schoolConfig.majors);
@@ -20,6 +23,8 @@ export default function Majors() {
 
   if (!majors.length) return null;
 
+  const preview = majors.slice(0, PREVIEW);
+
   return (
     <section id="majors" className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-20">
@@ -29,15 +34,22 @@ export default function Majors() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.5 }}
-          className="mb-10 text-center"
+          className="mb-10 flex items-end justify-between"
         >
-          <span className="text-sm font-semibold uppercase tracking-wide text-primary">
-            Ta'lim yo'nalishlari
-          </span>
-          <h2 className="mt-3 text-3xl font-bold text-gray-900">Kasb-hunar yo'nalishlari</h2>
-          <p className="mx-auto mt-3 max-w-xl text-gray-500">
-            Zamonaviy ustaxona va laboratoriyalarda amaliy mahorat bilan birga nazariy bilim beramiz.
-          </p>
+          <div>
+            <span className="text-sm font-semibold uppercase tracking-wide text-primary">
+              Ta'lim yo'nalishlari
+            </span>
+            <h2 className="mt-3 text-3xl font-bold text-gray-900">Kasb-hunar yo'nalishlari</h2>
+            <p className="mt-3 max-w-xl text-gray-500">
+              Zamonaviy ustaxona va laboratoriyalarda amaliy mahorat bilan birga nazariy bilim beramiz.
+            </p>
+          </div>
+          {majors.length > PREVIEW && (
+            <Link href="/yonalishlar" className="hidden shrink-0 text-sm font-medium text-primary hover:text-primary-hover sm:block">
+              Barchasi →
+            </Link>
+          )}
         </motion.div>
 
         <motion.div
@@ -47,7 +59,7 @@ export default function Majors() {
           viewport={{ once: true, amount: 0.1 }}
           className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {majors.map((major, i) => (
+          {preview.map((major, i) => (
             <motion.div
               key={major.name + i}
               variants={scaleIn}
