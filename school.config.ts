@@ -128,9 +128,6 @@ export interface SchoolConfig {
   // --- Foydali manbalar ---
   usefulLinks: UsefulLink[];
 
-  // --- Admin panel paroli ---
-  adminPassword: string; // /admin ga kirish paroli
-
   // --- Telegram bildirishnoma (xabar yuborilganda) ---
   telegramNotify?: {
     botToken: string; // @BotFather dan olingan token
@@ -385,8 +382,6 @@ export const schoolConfig: SchoolConfig = {
       logo: "https://edu.uz/favicon.ico",
     },
   ],
-
-  adminPassword: "Admin@2026", // ← bu parolni o'zgartiring!
 
   social: {
     telegram: "https://t.me/maktab15",

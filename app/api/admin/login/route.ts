@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { schoolConfig } from "@/school.config";
 import { getAdminAuth } from "@/lib/firebaseAdmin";
 
 // 15 daqiqada 10 ta urinishdan ko'p bo'lsa bloklash
@@ -58,7 +57,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Parol noto'g'ri" }, { status: 401 });
   }
 
-  if (password !== schoolConfig.adminPassword) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword || password !== adminPassword) {
     return NextResponse.json(
       { error: `Parol noto'g'ri. ${remaining} ta urinish qoldi.` },
       { status: 401 }
