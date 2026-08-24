@@ -27,6 +27,7 @@ export default function NewsAdminPage() {
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   async function load() {
     setLoading(true);
@@ -98,6 +99,29 @@ export default function NewsAdminPage() {
     setImages((prev) => prev.filter((u) => u !== url));
   }
 
+  function makeCover(url: string) {
+    setImages((prev) => [url, ...prev.filter((u) => u !== url)]);
+  }
+
+  // Tanlangan rasmga mos [rasm:N] belgisini kursor turgan joyga qo'shadi.
+  function insertImageToken(index: number) {
+    const token = `[rasm:${index + 1}]`;
+    const el = contentRef.current;
+    if (!el) { setContent((c) => (c ? `${c}\n\n${token}` : token)); return; }
+
+    const start = el.selectionStart ?? content.length;
+    const end = el.selectionEnd ?? content.length;
+    const insertion = `\n\n${token}\n\n`;
+    const next = content.slice(0, start) + insertion + content.slice(end);
+    setContent(next);
+
+    const pos = start + insertion.length;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(pos, pos);
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !excerpt.trim()) return;
@@ -164,8 +188,13 @@ export default function NewsAdminPage() {
           </Field>
 
           <Field label="To'liq matn (ixtiyoriy)">
-            <textarea value={content} onChange={(e) => setContent(e.target.value)}
+            <textarea ref={contentRef} value={content} onChange={(e) => setContent(e.target.value)}
               rows={5} placeholder={"Yangilik to'liq matni...\n\nIkki satr oralig'i — yangi paragraf."} className="input resize-none" />
+            {images.length > 0 && (
+              <p className="mt-1 text-xs text-gray-400">
+                Rasmni matn ichiga joylashtirish uchun pastdagi rasm ostidagi "Matnga qo'shish" tugmasini bosing.
+              </p>
+            )}
           </Field>
 
           {/* Rasmlar */}
@@ -175,17 +204,33 @@ export default function NewsAdminPage() {
             </span>
 
             {images.length > 0 && (
-              <div className="mb-2 grid grid-cols-3 gap-2">
+              <div className="mb-2 space-y-2">
                 {images.map((url, i) => (
-                  <div key={url} className="relative overflow-hidden rounded-lg border border-gray-200">
-                    <Image src={url} alt={`Rasm ${i + 1}`} width={150} height={100} className="h-20 w-full object-cover" />
-                    {i === 0 && (
-                      <span className="absolute left-1 top-1 rounded bg-primary/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                        Muqova
+                  <div key={url} className="flex items-center gap-3 rounded-lg border border-gray-200 p-2">
+                    <div className="relative shrink-0 overflow-hidden rounded-lg">
+                      <Image src={url} alt={`Rasm ${i + 1}`} width={56} height={56} className="h-14 w-14 object-cover" />
+                      <span className="absolute left-0.5 top-0.5 rounded bg-black/60 px-1 text-[10px] font-medium text-white">
+                        {i + 1}
                       </span>
-                    )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      {i === 0 ? (
+                        <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">
+                          Muqova
+                        </span>
+                      ) : (
+                        <button type="button" onClick={() => makeCover(url)}
+                          className="block text-[11px] font-medium text-primary hover:underline">
+                          Muqova qil
+                        </button>
+                      )}
+                      <button type="button" onClick={() => insertImageToken(i)}
+                        className="block text-[11px] text-gray-500 hover:text-primary hover:underline">
+                        Matnga qo'shish
+                      </button>
+                    </div>
                     <button type="button" onClick={() => removeImage(url)}
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-xs text-gray-600 hover:bg-white">
+                      className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-500">
                       ✕
                     </button>
                   </div>

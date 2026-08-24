@@ -50,7 +50,24 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
     .split("\n\n")
     .filter(Boolean);
   const images = newsImages(item);
-  const gallery = images.slice(1);
+
+  // "[rasm:2]" kabi paragraflar matn o'rniga o'sha rasmni ko'rsatadi.
+  const IMAGE_TOKEN = /^\[rasm:(\d+)\]$/;
+  const usedInline = new Set<number>();
+  const blocks = paragraphs.map((p) => {
+    const match = p.trim().match(IMAGE_TOKEN);
+    const index = match ? Number(match[1]) - 1 : -1;
+    if (match && images[index]) {
+      usedInline.add(index);
+      return { type: "image" as const, src: images[index] };
+    }
+    return { type: "text" as const, text: p };
+  });
+
+  // Matn ichida ishlatilmagan qolgan rasmlar (muqovadan tashqari) pastda galereya bo'lib chiqadi.
+  const gallery = images
+    .map((src, i) => ({ src, i }))
+    .filter(({ i }) => i !== 0 && !usedInline.has(i));
 
   return (
     <>
@@ -93,18 +110,30 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
               </h1>
 
               <div className="mt-6 space-y-4 text-gray-700 leading-relaxed">
-                {paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
+                {blocks.map((block, i) =>
+                  block.type === "image" ? (
+                    <div key={i} className="relative h-56 w-full overflow-hidden rounded-lg bg-gray-100 sm:h-72">
+                      <ImageWithSkeleton
+                        src={block.src}
+                        alt={`${item.title} — rasm`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 768px"
+                      />
+                    </div>
+                  ) : (
+                    <p key={i}>{block.text}</p>
+                  )
+                )}
               </div>
 
               {gallery.length > 0 && (
                 <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {gallery.map((src, i) => (
+                  {gallery.map(({ src, i }) => (
                     <div key={i} className="relative h-32 overflow-hidden rounded-lg bg-gray-100 sm:h-40">
                       <ImageWithSkeleton
                         src={src}
-                        alt={`${item.title} — rasm ${i + 2}`}
+                        alt={`${item.title} — rasm ${i + 1}`}
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 50vw, 33vw"
