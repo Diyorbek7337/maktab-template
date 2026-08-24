@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { getGallery, addGalleryItem, deleteGalleryItem, type GalleryItem } from "@/lib/firestore";
+import { compressImage } from "@/lib/imageCompress";
 
 const CATEGORIES = ["Umumiy", "Tadbirlar", "Sport", "Fanlar", "Sayohat", "Bitiruvchilar"];
+const CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 export default function GalleryAdminPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -29,9 +31,9 @@ export default function GalleryAdminPage() {
       if (file.size > 5 * 1024 * 1024) { alert(`${file.name} — 5 MB dan katta`); continue; }
 
       try {
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const storageRef = ref(storage, `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
-        await uploadBytes(storageRef, file);
+        const compressed = await compressImage(file);
+        const storageRef = ref(storage, `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`);
+        await uploadBytes(storageRef, compressed, { cacheControl: CACHE_CONTROL });
         const url = await getDownloadURL(storageRef);
         const id = await addGalleryItem({ url, ...(caption ? { caption } : {}), category });
         setItems((prev) => [{ id, url, caption, category }, ...prev]);

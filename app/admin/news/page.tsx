@@ -9,6 +9,7 @@ import { initialNews, formatDateUz, newsImages } from "@/lib/data";
 import { compressImage } from "@/lib/imageCompress";
 
 const CATEGORIES = ["E'lon", "Yangilik", "Yutuq", "Tadbir"];
+const CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 60);
@@ -81,7 +82,7 @@ export default function NewsAdminPage() {
         // Yuklashdan oldin siqamiz — sifat deyarli saqlanadi, hajm ancha kichrayadi.
         const compressed = await compressImage(file);
         const storageRef = ref(storage, `news/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`);
-        await uploadBytes(storageRef, compressed);
+        await uploadBytes(storageRef, compressed, { cacheControl: CACHE_CONTROL });
         const url = await getDownloadURL(storageRef);
         setImages((prev) => [...prev, url]);
       } catch {

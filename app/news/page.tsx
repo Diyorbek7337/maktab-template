@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
+import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
 import { getNews, type NewsDoc } from "@/lib/firestore";
 import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
 
@@ -64,8 +64,8 @@ export default function NewsPage() {
                   className="group flex flex-col rounded-xl border border-gray-200 bg-white overflow-hidden hover:border-primary hover:shadow-md transition-all"
                 >
                   {cover ? (
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <Image
+                    <div className="relative h-48 w-full overflow-hidden bg-gray-100">
+                      <ImageWithSkeleton
                         src={cover}
                         alt={item.title}
                         fill

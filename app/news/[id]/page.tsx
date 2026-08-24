@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
+import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
 import { initialNews, formatDateUz, newsImages } from "@/lib/data";
 import { schoolConfig } from "@/school.config";
 import { getNews } from "@/lib/firestore";
@@ -68,8 +68,8 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
 
           <article className="rounded-xl border border-gray-200 bg-white overflow-hidden">
             {images[0] && (
-              <div className="relative h-64 w-full sm:h-80">
-                <Image
+              <div className="relative h-64 w-full bg-gray-100 sm:h-80">
+                <ImageWithSkeleton
                   src={images[0]}
                   alt={item.title}
                   fill
@@ -101,8 +101,8 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
               {gallery.length > 0 && (
                 <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {gallery.map((src, i) => (
-                    <div key={i} className="relative h-32 overflow-hidden rounded-lg sm:h-40">
-                      <Image
+                    <div key={i} className="relative h-32 overflow-hidden rounded-lg bg-gray-100 sm:h-40">
+                      <ImageWithSkeleton
                         src={src}
                         alt={`${item.title} — rasm ${i + 2}`}
                         fill

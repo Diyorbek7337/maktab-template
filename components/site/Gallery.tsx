@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import ImageWithSkeleton from "./ImageWithSkeleton";
 import { getGallery, type GalleryItem } from "@/lib/firestore";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
@@ -69,14 +70,14 @@ export default function Gallery() {
               key={item.id}
               variants={scaleIn}
               onClick={() => setLightbox(item)}
-              className={`group relative overflow-hidden rounded-xl ${i === 0 ? "sm:col-span-2 sm:row-span-2" : ""}`}
+              className={`group relative overflow-hidden rounded-xl bg-gray-100 ${i === 0 ? "h-64 sm:col-span-2 sm:row-span-2 sm:h-80" : "h-40"}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <ImageWithSkeleton
                 src={item.url}
                 alt={item.caption ?? ""}
-                className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${i === 0 ? "h-64 sm:h-80" : "h-40"}`}
-                loading="lazy"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes={i === 0 ? "(max-width: 640px) 100vw, 66vw" : "(max-width: 640px) 50vw, 33vw"}
               />
               <div className="absolute inset-0 bg-black/0 transition-all group-hover:bg-black/30 flex items-center justify-center">
                 <svg className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>

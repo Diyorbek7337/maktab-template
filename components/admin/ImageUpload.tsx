@@ -3,6 +3,12 @@
 import { useRef, useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import { compressImage } from "@/lib/imageCompress";
+
+// Firebase Storage sukut bo'yicha "no-cache" yuboradi — bu esa har safar
+// rasmni to'liq qayta yuklashga majbur qiladi. Fayl nomi vaqt tamg'asi bilan
+// noyob bo'lgani uchun uzoq muddatli keshlash butunlay xavfsiz.
+const CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 interface Props {
   value: string;
@@ -29,9 +35,9 @@ export default function ImageUpload({ value, onChange, folder, label = "Rasm (ix
     setUploading(true);
 
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const storageRef = ref(storage, `${folder}/${Date.now()}.${ext}`);
-      await uploadBytes(storageRef, file);
+      const compressed = await compressImage(file);
+      const storageRef = ref(storage, `${folder}/${Date.now()}.jpg`);
+      await uploadBytes(storageRef, compressed, { cacheControl: CACHE_CONTROL });
       const url = await getDownloadURL(storageRef);
       onChange(url);
       setPreview(url);

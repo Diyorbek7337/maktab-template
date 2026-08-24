@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
+import ImageWithSkeleton from "./ImageWithSkeleton";
 import { getNews, type NewsDoc } from "@/lib/firestore";
 import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
@@ -63,8 +63,8 @@ export default function News() {
                 className="group flex flex-col rounded-xl border border-gray-200 bg-white overflow-hidden transition-all hover:border-primary hover:shadow-md"
               >
                 {cover ? (
-                  <div className="relative h-48 w-full overflow-hidden">
-                    <Image
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-100">
+                    <ImageWithSkeleton
                       src={cover}
                       alt={item.title}
                       fill
