@@ -55,14 +55,22 @@ const iconMajor = (
 );
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    majors: "—",
-    teachers: "—",
+  const [stats, setStats] = useState<{
+    majors: string; majorsHint: string | null;
+    teachers: string; teachersHint: string | null;
+    unreadMessages: string;
+    gallery: string; galleryHint: string | null;
+    clubs: string; clubsHint: string | null;
+    winners: string; winnersHint: string | null;
+    alumni: string; alumniHint: string | null;
+  }>({
+    majors: "—", majorsHint: null,
+    teachers: "—", teachersHint: null,
     unreadMessages: "—",
-    gallery: "—",
-    clubs: "—",
-    winners: "—",
-    alumni: "—",
+    gallery: "—", galleryHint: null,
+    clubs: "—", clubsHint: null,
+    winners: "—", winnersHint: null,
+    alumni: "—", alumniHint: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -76,35 +84,53 @@ export default function AdminDashboard() {
       getWinners(),
       getAlumni(),
     ]).then(([majors, teachers, messages, gallery, clubs, winners, alumni]) => {
-      const majorCount = majors.status === "fulfilled" ? majors.value.length : schoolConfig.majors.length;
-      const teacherCount = teachers.status === "fulfilled" ? teachers.value.length : schoolConfig.teachers.length;
-      const unread = messages.status === "fulfilled" ? messages.value.filter((m) => !m.read).length : 0;
-      const galleryCount = gallery.status === "fulfilled" ? gallery.value.length : 0;
-      const clubCount = clubs.status === "fulfilled" ? clubs.value.length : schoolConfig.clubs.length;
-      const winnerCount = winners.status === "fulfilled" ? winners.value.length : schoolConfig.olympiadWinners.length;
-      const alumniCount = alumni.status === "fulfilled" ? alumni.value.length : schoolConfig.alumni.length;
+      // Firestore bo'sh bo'lganda sayt config'dagi namunalarni ko'rsatadi —
+      // panel ham AYNAN shu qoidaga bo'ysunishi kerak. Ilgari u Firestore'ni
+      // to'g'ridan-to'g'ri sanardi va saytda 8 ta yo'nalish turgan holda
+      // "0" deb ko'rsatib, adminni chalg'itardi.
+      const fromDb = <T,>(r: PromiseSettledResult<T[]>): T[] | null =>
+        r.status === "fulfilled" ? r.value : null;
+
+      const resolve = <T,>(r: PromiseSettledResult<T[]>, fallback: readonly unknown[]) => {
+        const rows = fromDb(r);
+        if (rows === null) return { value: "—", hint: "yuklanmadi" };
+        if (rows.length === 0 && fallback.length > 0) {
+          return { value: String(fallback.length), hint: "namuna (bazada yo'q)" };
+        }
+        return { value: String(rows.length), hint: null };
+      };
+
+      const m = resolve(majors, schoolConfig.majors);
+      const t = resolve(teachers, schoolConfig.teachers);
+      const c = resolve(clubs, schoolConfig.clubs);
+      const w = resolve(winners, schoolConfig.olympiadWinners);
+      const a = resolve(alumni, schoolConfig.alumni);
+      const g = resolve(gallery, []);
+
+      const msgRows = fromDb(messages);
+      const unread = msgRows ? msgRows.filter((x) => !x.read).length : null;
 
       setStats({
-        majors: String(majorCount),
-        teachers: String(teacherCount),
-        unreadMessages: unread > 0 ? `${unread} yangi` : "0",
-        gallery: String(galleryCount),
-        clubs: String(clubCount),
-        winners: String(winnerCount),
-        alumni: String(alumniCount),
+        majors: m.value, majorsHint: m.hint,
+        teachers: t.value, teachersHint: t.hint,
+        unreadMessages: unread === null ? "—" : unread > 0 ? `${unread} yangi` : "0",
+        gallery: g.value, galleryHint: g.hint,
+        clubs: c.value, clubsHint: c.hint,
+        winners: w.value, winnersHint: w.hint,
+        alumni: a.value, alumniHint: a.hint,
       });
       setLoading(false);
     });
   }, []);
 
   const cards: StatCard[] = [
-    { label: "Yo'nalishlar",     value: stats.majors,         hint: "jami mutaxassislik", href: "/admin/majors",   icon: iconMajor   },
-    { label: "O'qituvchilar",    value: stats.teachers,       hint: "jami pedagog",       href: "/admin/teachers", icon: iconTeacher },
-    { label: "Xabarlar",         value: stats.unreadMessages, hint: "o'qilmagan",         href: "/admin/messages", icon: iconInbox   },
-    { label: "Galereya rasmlari",value: stats.gallery,        hint: "jami yuklangan",     href: "/admin/gallery",  icon: iconGallery },
-    { label: "To'garaklar",      value: stats.clubs,          hint: "faol seksiyalar",    href: "/admin/clubs",    icon: iconClub    },
-    { label: "Musobaqa g'oliblari", value: stats.winners,     hint: "jami g'oliblar",     href: "/admin/olympiad", icon: iconMedal   },
-    { label: "Bitiruvchilar",    value: stats.alumni,         hint: "qayd etilgan",       href: "/admin/alumni",   icon: iconAlumni  },
+    { label: "Yo'nalishlar",     value: stats.majors,         hint: stats.majorsHint   ?? "jami mutaxassislik", href: "/admin/majors",   icon: iconMajor   },
+    { label: "O'qituvchilar",    value: stats.teachers,       hint: stats.teachersHint ?? "jami pedagog",       href: "/admin/teachers", icon: iconTeacher },
+    { label: "Xabarlar",         value: stats.unreadMessages, hint: "o'qilmagan",                              href: "/admin/messages", icon: iconInbox   },
+    { label: "Galereya",         value: stats.gallery,        hint: stats.galleryHint  ?? "rasm va video",      href: "/admin/gallery",  icon: iconGallery },
+    { label: "To'garaklar",      value: stats.clubs,          hint: stats.clubsHint    ?? "faol seksiyalar",    href: "/admin/clubs",    icon: iconClub    },
+    { label: "Musobaqa g'oliblari", value: stats.winners,     hint: stats.winnersHint  ?? "jami g'oliblar",     href: "/admin/olympiad", icon: iconMedal   },
+    { label: "Bitiruvchilar",    value: stats.alumni,         hint: stats.alumniHint   ?? "qayd etilgan",       href: "/admin/alumni",   icon: iconAlumni  },
   ];
 
   return (
