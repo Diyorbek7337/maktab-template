@@ -35,40 +35,30 @@ export default function NewsAdminPage() {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Firestore bo'sh bo'lsa namuna yangiliklar ko'rsatiladi (tahrirlab bo'lmaydi)
+  const sampleNews = (): NewsDoc[] =>
+    initialNews.map((n) => ({
+      id: String(n.id),
+      slug: n.slug,
+      title: n.title,
+      category: n.category,
+      excerpt: n.excerpt,
+      content: n.content,
+      image: n.image,
+      date: n.date,
+    }));
+
   async function load() {
     setLoading(true);
+    setError("");
     try {
       const firestoreNews = await getNews();
-      if (firestoreNews.length > 0) {
-        setNews(firestoreNews);
-      } else {
-        // Firestore bo'sh bo'lsa, initialNews ni ko'rsatamiz (o'zgartirish mumkin emas)
-        setNews(
-          initialNews.map((n) => ({
-            id: String(n.id),
-            slug: n.slug,
-            title: n.title,
-            category: n.category,
-            excerpt: n.excerpt,
-            content: n.content,
-            image: n.image,
-            date: n.date,
-          }))
-        );
-      }
+      setNews(firestoreNews.length > 0 ? firestoreNews : sampleNews());
     } catch {
-      setNews(
-        initialNews.map((n) => ({
-          id: String(n.id),
-          slug: n.slug,
-          title: n.title,
-          category: n.category,
-          excerpt: n.excerpt,
-          content: n.content,
-          image: n.image,
-          date: n.date,
-        }))
-      );
+      // Ilgari bu xato jimgina yutilardi va admin namunalarni haqiqiy
+      // ma'lumot deb o'ylardi — endi aniq aytiladi.
+      setError("Yangiliklarni yuklab bo'lmadi — quyida namunalar ko'rsatilmoqda. Sahifani yangilang yoki qaytadan kiring.");
+      setNews(sampleNews());
     } finally {
       setLoading(false);
     }

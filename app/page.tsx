@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 import Hero from "@/components/site/Hero";
 import About from "@/components/site/About";
 import Majors from "@/components/site/Majors";
+import Schedule from "@/components/site/Schedule";
 import History from "@/components/site/History";
 import Administration from "@/components/site/Administration";
 import Teachers from "@/components/site/Teachers";
@@ -37,6 +38,7 @@ export default function HomePage() {
         <History />
         <Administration />
         <Teachers />
+        <Schedule />
         <OlympiadWinners />
         <Gallery />
         <Clubs />

@@ -35,6 +35,22 @@ export function newsCover(
   return undefined;
 }
 
+/**
+ * Yo'nalish nomidan URL uchun slug yasaydi.
+ *
+ * Yo'nalishlar config'da ham, Firestore'da ham bo'lishi mumkin va
+ * config'dagilarda id yo'q — shuning uchun manzil nomdan hosil qilinadi.
+ * O'zbekcha apostrof va harflar hisobga olingan.
+ */
+export function majorSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['''`]/g, "")
+    .replace(/[^a-z0-9Ѐ-ӿ]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
 export interface NewsItem {
   id: number;
   slug: string;   // URL uchun: "imtihon-boshlandi"

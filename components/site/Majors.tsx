@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { schoolConfig, type Major } from "@/school.config";
 import { getMajors, type MajorDoc } from "@/lib/firestore";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
+import { majorSlug } from "@/lib/data";
 import ImageWithSkeleton from "./ImageWithSkeleton";
 
 type MajorItem = Major | MajorDoc;
@@ -60,11 +61,11 @@ export default function Majors() {
           className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
           {preview.map((major, i) => (
-            <motion.div
-              key={major.name + i}
-              variants={scaleIn}
-              className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-md"
-            >
+            <motion.div key={major.name + i} variants={scaleIn}>
+              <Link
+                href={`/yonalishlar/${majorSlug(major.name)}`}
+                className="group block h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-primary hover:shadow-md"
+              >
               {major.image ? (
                 <div className="relative h-40 w-full overflow-hidden bg-gray-100">
                   <ImageWithSkeleton
@@ -109,6 +110,7 @@ export default function Majors() {
                   </span>
                 </div>
               </div>
+              </Link>
             </motion.div>
           ))}
         </motion.div>

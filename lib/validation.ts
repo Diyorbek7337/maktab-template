@@ -26,6 +26,13 @@ export const contactSchema = z.object({
     .trim()
     .min(5, "Xabar juda qisqa")
     .max(3000, "Xabar juda uzun"),
+
+  /**
+   * Honeypot — formada ko'rinmas maydon. Odam uni hech qachon
+   * to'ldirmaydi, avtomatik bot esa barcha maydonlarni to'ldiradi.
+   * To'ldirilgan bo'lsa — bu bot.
+   */
+  website: z.string().max(0, "Spam aniqlandi").optional(),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;

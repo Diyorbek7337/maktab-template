@@ -10,6 +10,9 @@ export default function ScheduleAdminPage() {
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
+  const [error, setError]       = useState("");
+  /** Saqlanmagan o'zgarishlar bormi */
+  const [dirty, setDirty]       = useState(false);
 
   const [time, setTime]       = useState("");
   const [subject, setSubject] = useState("");
@@ -19,9 +22,19 @@ export default function ScheduleAdminPage() {
   useEffect(() => {
     getSchedule()
       .then((data) => { if (data) setSchedule(data); })
-      .catch(() => {})
+      .catch(() => setError("Jadvalni yuklab bo'lmadi. Sahifani yangilang yoki qaytadan kiring."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Bu sahifa boshqalardan farqli: o'zgarishlar faqat "Saqlash" bosilganda
+  // bazaga yoziladi. Tugmani bosmasdan chiqib ketilsa hammasi yo'qolardi —
+  // shuning uchun brauzer ogohlantiradi.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -33,6 +46,7 @@ export default function ScheduleAdminPage() {
       room: room.trim() || "—",
     };
     setSchedule((prev) => ({ ...prev, [activeDay]: [...prev[activeDay], entry] }));
+    setDirty(true);
     setTime(""); setSubject(""); setTeacher(""); setRoom("");
   }
 
@@ -41,16 +55,19 @@ export default function ScheduleAdminPage() {
       ...prev,
       [activeDay]: prev[activeDay].filter((_, i) => i !== index),
     }));
+    setDirty(true);
   }
 
   async function handleSave() {
     setSaving(true);
+    setError("");
     try {
       await saveFullSchedule(schedule);
+      setDirty(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {
-      alert("Saqlashda xatolik. Firebase config ni tekshiring.");
+      setError("Saqlab bo'lmadi. Sessiya tugagan bo'lishi mumkin — sahifani yangilang va qaytadan urinib ko'ring.");
     } finally {
       setSaving(false);
     }
@@ -63,21 +80,33 @@ export default function ScheduleAdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Dars jadvali</h2>
-          <p className="mt-1 text-gray-500">Kun bo'yicha darslarni qo'shing va boshqaring.</p>
+          <p className="mt-1 text-gray-500">
+            Kun bo'yicha darslarni qo'shing. O'zgarishlar <b>Saqlash</b> bosilgandagina saytga chiqadi.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {saved && (
             <span className="text-sm text-green-600 font-medium">✓ Saqlandi</span>
           )}
+          {dirty && !saved && (
+            <span className="text-sm font-medium text-amber-600">Saqlanmagan o'zgarishlar bor</span>
+          )}
           <button
             onClick={handleSave}
             disabled={saving || loading}
-            className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors disabled:opacity-50"
+            className={[
+              "rounded-lg px-5 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50",
+              dirty ? "bg-amber-600 hover:bg-amber-700" : "bg-primary hover:bg-primary-hover",
+            ].join(" ")}
           >
             {saving ? "Saqlanmoqda…" : "💾 Saqlash"}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       {loading && <p className="text-sm text-gray-400">Jadval yuklanmoqda…</p>}
 

@@ -40,7 +40,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { name, phone, subject, body } = parsed.data;
+  const { name, phone, subject, body, website } = parsed.data;
+
+  // Honeypot to'ldirilgan — bot. Botga xatolik ko'rsatmaymiz (aks holda
+  // u boshqa yo'l qidiradi), shunchaki hech narsa yozmaymiz.
+  if (website) {
+    console.warn("[contact] honeypot ishga tushdi, IP:", ip);
+    return NextResponse.json({ ok: true });
+  }
 
   try {
     // Admin SDK xavfsizlik qoidalarini chetlab o'tadi — bu yerda bu xavfsiz,

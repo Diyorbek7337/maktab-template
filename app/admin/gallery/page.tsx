@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
-import { getGallery, addGalleryItem, deleteGalleryItem, type GalleryItem } from "@/lib/firestore";
+import { getGalleryPage, addGalleryItem, deleteGalleryItem, type GalleryItem, type PageCursor } from "@/lib/firestore";
 import { compressImage } from "@/lib/imageCompress";
 import { parseYouTubeId, youTubeThumbnail } from "@/lib/youtube";
 
 const CATEGORIES = ["Umumiy", "Tadbirlar", "Sport", "Fanlar", "Sayohat", "Bitiruvchilar"];
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
+const PAGE_SIZE = 30;
 
 export default function GalleryAdminPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -18,6 +19,9 @@ export default function GalleryAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [cursor, setCursor] = useState<PageCursor | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [videoSaving, setVideoSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -27,12 +31,33 @@ export default function GalleryAdminPage() {
 
   async function load() {
     setLoading(true);
+    setError("");
     try {
-      setItems(await getGallery());
+      // Butun galereya emas, birinchi sahifa — rasmlar soni o'sib borsa ham
+      // admin paneli sekinlashmaydi
+      const page = await getGalleryPage(PAGE_SIZE);
+      setItems(page.items);
+      setCursor(page.cursor);
+      setHasMore(page.hasMore);
     } catch {
       setError("Galereyani yuklab bo'lmadi. Sahifani yangilang yoki qaytadan kiring.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await getGalleryPage(PAGE_SIZE, cursor);
+      setItems((prev) => [...prev, ...page.items]);
+      setCursor(page.cursor);
+      setHasMore(page.hasMore);
+    } catch {
+      setError("Keyingi rasmlarni yuklab bo'lmadi.");
+    } finally {
+      setLoadingMore(false);
     }
   }
 
@@ -263,6 +288,18 @@ export default function GalleryAdminPage() {
             </div>
           ))}
         </div>
+
+        {!loading && hasMore && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="rounded-lg border-2 border-primary px-6 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+            >
+              {loadingMore ? "Yuklanmoqda…" : "Ko'proq yuklash"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

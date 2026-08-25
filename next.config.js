@@ -26,7 +26,8 @@ const cspDirectives = [
   // Rasmlar: Firebase Storage, YouTube muqovalari (i.ytimg.com),
   // favicon'lar (foydali havolalar bo'limi), blob:/data: — admin
   // panelidagi yuklashdan oldingi ko'rish uchun
-  "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleapis.com https://i.ytimg.com https://img.youtube.com https://president.uz https://my.gov.uz https://edu.uz",
+  // gov.uz ham kerak: edu.uz favicon so'rovi gov.uz ga yo'naltiradi
+  "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleapis.com https://i.ytimg.com https://img.youtube.com https://president.uz https://my.gov.uz https://gov.uz https://edu.uz",
 
   // Firebase SDK ulanadigan manzillar (Firestore, Auth, Storage)
   "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com",

@@ -15,7 +15,7 @@ const SUBJECTS = [
   "Taklif",
 ];
 
-const blank = () => ({ name: "", phone: "", subject: SUBJECTS[0], body: "" });
+const blank = () => ({ name: "", phone: "", subject: SUBJECTS[0], body: "", website: "" });
 
 export default function Contact() {
   const { address, phones, email, workingHours, mapEmbedUrl } = schoolConfig;
@@ -40,6 +40,7 @@ export default function Contact() {
           phone: form.phone.trim(),
           subject: form.subject,
           body: form.body.trim(),
+          website: form.website,
         }),
       });
 
@@ -200,6 +201,23 @@ export default function Contact() {
                       />
                     </Field>
                   </motion.div>
+
+                  {/* Honeypot: odam ko'rmaydi, bot to'ldiradi.
+                      `hidden` emas — ba'zi botlar yashirin maydonlarni
+                      o'tkazib yuboradi, shuning uchun ekrandan chetga
+                      chiqarilgan va yordamchi texnologiyalardan berkitilgan. */}
+                  <div className="absolute -left-[9999px] top-0" aria-hidden="true">
+                    <label htmlFor="website">Veb-sayt (to'ldirmang)</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={form.website}
+                      onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
+                    />
+                  </div>
 
                   {status === "error" && (
                     <p className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
