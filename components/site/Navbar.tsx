@@ -66,12 +66,9 @@ export default function Navbar() {
               </a>
             )
           )}
-          <Link
-            href="/admin"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
-          >
-            Admin panel
-          </Link>
+          {/* "Admin panel" tugmasi ataylab yo'q: u tashrifchilarga kerak emas
+              va panel manzilini bexosdan e'lon qilib turardi. Xodimlar
+              /admin manzilini to'g'ridan-to'g'ri kiritadi. */}
         </nav>
 
         {/* Mobil tugma */}
@@ -110,13 +107,6 @@ export default function Navbar() {
               </a>
             )
           )}
-          <Link
-            href="/admin"
-            onClick={() => setOpen(false)}
-            className="block rounded-lg bg-primary px-3 py-2 text-center font-medium text-white hover:bg-primary-hover transition-colors"
-          >
-            Admin panel
-          </Link>
         </nav>
       )}
     </header>
