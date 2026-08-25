@@ -1,8 +1,7 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
@@ -12,44 +11,49 @@ import { majorSlug } from "@/lib/data";
 
 type MajorItem = Major | MajorDoc;
 
-export default function MajorDetailPage() {
-  const params = useParams<{ slug: string }>();
-  const slug = params?.slug ?? "";
+// Server komponenti: mavjud bo'lmagan yo'nalish uchun HAQIQIY 404 qaytadi
+// (client komponentida sahifa 200 bilan kelib, keyin 404 ko'rsatardi —
+// qidiruv tizimlari uni mavjud sahifa deb indekslashi mumkin edi).
+export const revalidate = 300;
 
-  const [majors, setMajors] = useState<MajorItem[]>(schoolConfig.majors);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Yo'nalishlar soni kam (o'nlab), shuning uchun hammasi bir marta
-    // olinadi — yangiliklardagidek cheksiz o'sadigan ro'yxat emas.
-    getMajors()
-      .then((data) => { if (data.length) setMajors(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const major = majors.find((m) => majorSlug(m.name) === slug);
-
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <main className="min-h-screen bg-gray-50">
-          <div className="mx-auto max-w-3xl animate-pulse px-4 py-12">
-            <div className="h-4 w-40 rounded bg-gray-200" />
-            <div className="mt-6 h-56 rounded-2xl bg-gray-200" />
-            <div className="mt-6 h-8 w-2/3 rounded bg-gray-200" />
-            <div className="mt-4 h-4 w-full rounded bg-gray-200" />
-          </div>
-        </main>
-        <Footer />
-      </>
-    );
+const loadMajors = cache(async (): Promise<MajorItem[]> => {
+  try {
+    const data = await getMajors();
+    return data.length ? data : schoolConfig.majors;
+  } catch {
+    return schoolConfig.majors;
   }
+});
 
+const findMajor = cache(async (slug: string) => {
+  const majors = await loadMajors();
+  return majors.find((m) => majorSlug(m.name) === slug) ?? null;
+});
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const major = await findMajor(params.slug);
+  if (!major) return {};
+  return {
+    title: major.name,
+    description: major.description,
+    openGraph: {
+      title: `${major.name} | ${schoolConfig.shortName}`,
+      description: major.description,
+      images: major.image ? [{ url: major.image }] : [],
+    },
+  };
+}
+
+export default async function MajorDetailPage(
+  { params }: { params: { slug: string } }
+) {
+  const major = await findMajor(params.slug);
   if (!major) notFound();
 
-  const others = majors.filter((m) => majorSlug(m.name) !== slug).slice(0, 3);
+  const majors = await loadMajors();
+  const others = majors.filter((m) => majorSlug(m.name) !== params.slug).slice(0, 3);
 
   return (
     <>
@@ -91,7 +95,6 @@ export default function MajorDetailPage() {
                 {major.name}
               </h1>
 
-              {/* Asosiy ma'lumotlar */}
               <dl className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                   <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -120,7 +123,6 @@ export default function MajorDetailPage() {
                 <p className="mt-3 leading-relaxed text-gray-700">{major.description}</p>
               </div>
 
-              {/* Qabul uchun murojaat */}
               <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5">
                 <p className="font-medium text-gray-900">Shu yo&apos;nalishda o&apos;qimoqchimisiz?</p>
                 <p className="mt-1 text-sm text-gray-600">
@@ -146,7 +148,6 @@ export default function MajorDetailPage() {
             </div>
           </article>
 
-          {/* Boshqa yo'nalishlar */}
           {others.length > 0 && (
             <div className="mt-10">
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">

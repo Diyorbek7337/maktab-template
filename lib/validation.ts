@@ -30,9 +30,12 @@ export const contactSchema = z.object({
   /**
    * Honeypot — formada ko'rinmas maydon. Odam uni hech qachon
    * to'ldirmaydi, avtomatik bot esa barcha maydonlarni to'ldiradi.
-   * To'ldirilgan bo'lsa — bu bot.
+   *
+   * Diqqat: bu yerda ataylab RAD ETILMAYDI. Aks holda javobda "Spam
+   * aniqlandi" deb yozilib, botga qaysi maydon ushlaganini aytib
+   * qo'yardik. Tekshiruv route ichida, jimgina amalga oshiriladi.
    */
-  website: z.string().max(0, "Spam aniqlandi").optional(),
+  website: z.string().max(200).optional(),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
