@@ -23,15 +23,17 @@ const cspDirectives = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
 
-  // Rasmlar: Firebase Storage, favicon'lar (foydali havolalar bo'limi),
-  // blob:/data: — admin panelidagi yuklashdan oldingi ko'rish uchun
-  "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleapis.com https://president.uz https://my.gov.uz https://edu.uz",
+  // Rasmlar: Firebase Storage, YouTube muqovalari (i.ytimg.com),
+  // favicon'lar (foydali havolalar bo'limi), blob:/data: — admin
+  // panelidagi yuklashdan oldingi ko'rish uchun
+  "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleapis.com https://i.ytimg.com https://img.youtube.com https://president.uz https://my.gov.uz https://edu.uz",
 
   // Firebase SDK ulanadigan manzillar (Firestore, Auth, Storage)
   "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com",
 
-  // Xarita (Google/Yandex) embed uchun
-  "frame-src 'self' https://www.google.com https://maps.google.com https://yandex.com https://yandex.uz",
+  // Xarita (Google/Yandex) va YouTube video embed uchun.
+  // youtube-nocookie — video ochilmaguncha kuzatuv cookie'lari qo'yilmaydi.
+  "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com https://maps.google.com https://yandex.com https://yandex.uz",
 
   // Saytimizni boshqa hech kim iframe ichiga sola olmasin
   // (X-Frame-Options ning zamonaviy ekvivalenti)

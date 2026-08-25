@@ -5,7 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
-import { getNews, type NewsDoc } from "@/lib/firestore";
+import { getNewsPage, type NewsDoc, type PageCursor } from "@/lib/firestore";
 import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
 
 type AnyNews = NewsDoc | (NewsItem & { id: string | number });
@@ -14,16 +14,43 @@ function toSlug(item: AnyNews): string {
   return (item as NewsDoc).slug ?? String((item as NewsItem).id);
 }
 
+const PAGE_SIZE = 9;
+
 export default function NewsPage() {
   const [news, setNews] = useState<AnyNews[]>(initialNews);
   const [loading, setLoading] = useState(true);
+  const [cursor, setCursor] = useState<PageCursor | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    getNews()
-      .then((data) => { if (data.length) setNews(data); })
+    // Butun arxiv emas, faqat birinchi sahifa yuklanadi
+    getNewsPage(PAGE_SIZE)
+      .then((page) => {
+        if (page.items.length) {
+          setNews(page.items);
+          setCursor(page.cursor);
+          setHasMore(page.hasMore);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await getNewsPage(PAGE_SIZE, cursor);
+      setNews((prev) => [...prev, ...page.items]);
+      setCursor(page.cursor);
+      setHasMore(page.hasMore);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   return (
     <>
@@ -99,6 +126,18 @@ export default function NewsPage() {
                 </Link>
                 );
               })}
+            </div>
+          )}
+
+          {!loading && hasMore && (
+            <div className="mt-10 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="rounded-lg border-2 border-primary px-6 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+              >
+                {loadingMore ? "Yuklanmoqda…" : "Ko'proq yuklash"}
+              </button>
             </div>
           )}
         </div>

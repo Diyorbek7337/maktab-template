@@ -1,28 +1,32 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
 import { initialNews, formatDateUz, newsImages } from "@/lib/data";
+import { youTubeEmbedUrl } from "@/lib/youtube";
 import { schoolConfig } from "@/school.config";
-import { getNews } from "@/lib/firestore";
+import { getNewsBySlug } from "@/lib/firestore";
 
 export const dynamic = "force-dynamic";
 
-async function findArticle(slug: string) {
-  // Avval initialNews dan izlash
+// `cache()` bir render davomida takroriy chaqiruvni bir marta bajaradi —
+// generateMetadata va sahifaning o'zi bir xil so'rovni ikki marta
+// yubormaydi.
+const findArticle = cache(async (slug: string) => {
+  // Avval initialNews dan izlash (namuna yangiliklar — so'rovsiz)
   const staticItem = initialNews.find((n) => n.slug === slug);
   if (staticItem) return staticItem;
 
-  // Firestore'dan izlash
+  // Firestore'dan: butun to'plam emas, faqat shu bitta hujjat
   try {
-    const firestoreNews = await getNews();
-    return firestoreNews.find((n) => n.slug === slug) ?? null;
+    return await getNewsBySlug(slug);
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   if (!/^[a-z0-9-]{1,100}$/.test(params.id)) return {};
@@ -126,6 +130,21 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
                   )
                 )}
               </div>
+
+              {"videoId" in item && item.videoId && (
+                <div className="mt-8">
+                  <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                    <iframe
+                      src={youTubeEmbedUrl(item.videoId)}
+                      title={item.title}
+                      className="h-full w-full"
+                      loading="lazy"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              )}
 
               {gallery.length > 0 && (
                 <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -5,20 +5,47 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
-import { getGallery, type GalleryItem } from "@/lib/firestore";
+import { getGalleryPage, type GalleryItem, type PageCursor } from "@/lib/firestore";
+import { youTubeEmbedUrl } from "@/lib/youtube";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
 const ALL = "Barchasi";
+const PAGE_SIZE = 24;
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [active, setActive] = useState(ALL);
   const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cursor, setCursor] = useState<PageCursor | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    getGallery().then(setItems).catch(() => {}).finally(() => setLoading(false));
+    getGalleryPage(PAGE_SIZE)
+      .then((page) => {
+        setItems(page.items);
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await getGalleryPage(PAGE_SIZE, cursor);
+      setItems((prev) => [...prev, ...page.items]);
+      setCursor(page.cursor);
+      setHasMore(page.hasMore);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
@@ -84,7 +111,7 @@ export default function GalleryPage() {
                     initial="hidden"
                     animate="show"
                     onClick={() => setLightbox(item)}
-                    className="group mb-3 block w-full overflow-hidden rounded-xl"
+                    className="group relative mb-3 block w-full overflow-hidden rounded-xl"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -93,10 +120,29 @@ export default function GalleryPage() {
                       className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
+                    {item.videoId && (
+                      <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 transition-transform group-hover:scale-110">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    )}
                   </motion.button>
                 ))}
               </motion.div>
             </AnimatePresence>
+          )}
+
+          {!loading && hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="rounded-lg border-2 border-primary px-6 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+              >
+                {loadingMore ? "Yuklanmoqda…" : "Ko'proq yuklash"}
+              </button>
+            </div>
           )}
         </div>
       </main>
@@ -118,8 +164,20 @@ export default function GalleryPage() {
               className="relative max-h-[90vh] max-w-4xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={lightbox.url} alt={lightbox.caption ?? ""} className="max-h-[80vh] rounded-xl object-contain" />
+              {lightbox.videoId ? (
+                <div className="aspect-video w-[90vw] max-w-4xl overflow-hidden rounded-xl bg-black">
+                  <iframe
+                    src={youTubeEmbedUrl(lightbox.videoId, true)}
+                    title={lightbox.caption ?? "Video"}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={lightbox.url} alt={lightbox.caption ?? ""} className="max-h-[80vh] rounded-xl object-contain" />
+              )}
               {lightbox.caption && (
                 <p className="mt-3 text-center text-sm text-gray-300">{lightbox.caption}</p>
               )}

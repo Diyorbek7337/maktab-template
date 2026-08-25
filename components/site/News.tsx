@@ -20,7 +20,8 @@ export default function News() {
   const [news, setNews] = useState<AnyNews[]>(initialNews);
 
   useEffect(() => {
-    getNews()
+    // Bosh sahifada faqat 3 tasi ko'rinadi — hammasini yuklash shart emas
+    getNews(PREVIEW)
       .then((data) => { if (data.length) setNews(data); })
       .catch(() => {});
   }, []);

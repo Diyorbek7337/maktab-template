@@ -7,6 +7,7 @@ import { storage } from "@/lib/firebase";
 import { getNews, addNews, updateNews, deleteNews, type NewsDoc } from "@/lib/firestore";
 import { initialNews, formatDateUz, newsImages } from "@/lib/data";
 import { compressImage } from "@/lib/imageCompress";
+import { parseYouTubeId, youTubeThumbnail } from "@/lib/youtube";
 
 const CATEGORIES = ["E'lon", "Yangilik", "Yutuq", "Tadbir"];
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -23,6 +24,7 @@ export default function NewsAdminPage() {
   const [excerpt, setExcerpt]   = useState("");
   const [content, setContent]   = useState("");
   const [images, setImages]     = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
@@ -140,6 +142,7 @@ export default function NewsAdminPage() {
     setExcerpt(item.excerpt);
     setContent(item.content ?? "");
     setImages(imgs);
+    setVideoUrl(item.videoId ? `https://www.youtube.com/watch?v=${item.videoId}` : "");
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -147,7 +150,7 @@ export default function NewsAdminPage() {
     setEditingId(null);
     setPrevImages([]);
     setTitle(""); setExcerpt(""); setContent("");
-    setCategory(CATEGORIES[0]); setImages([]);
+    setCategory(CATEGORIES[0]); setImages([]); setVideoUrl("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -165,6 +168,7 @@ export default function NewsAdminPage() {
         date: new Date().toISOString().slice(0, 10),
         images: images.length ? images : undefined,
         image: images[0] || undefined,
+        videoId: parseYouTubeId(videoUrl) ?? undefined,
       };
 
       if (editingId) {
@@ -295,6 +299,40 @@ export default function NewsAdminPage() {
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
                 onChange={handleFilesChange} disabled={uploading} />
             </label>
+          </div>
+
+          {/* YouTube video (ixtiyoriy) */}
+          <div>
+            <span className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF0000">
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z" />
+              </svg>
+              YouTube videosi (ixtiyoriy)
+            </span>
+            <input
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className={`input ${videoUrl.trim() && !parseYouTubeId(videoUrl) ? "border-red-300" : ""}`}
+            />
+            {videoUrl.trim() && !parseYouTubeId(videoUrl) && (
+              <p className="mt-1 text-xs text-red-500">
+                Havola tanilmadi — video saqlanmaydi. YouTube manzilini tekshiring.
+              </p>
+            )}
+            {parseYouTubeId(videoUrl) && (
+              <div className="mt-2 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={youTubeThumbnail(parseYouTubeId(videoUrl)!)}
+                  alt="Video muqovasi"
+                  className="h-12 w-20 shrink-0 rounded object-cover"
+                />
+                <p className="text-xs text-green-600">
+                  ✓ Video tanildi — maqola ichida ko&apos;rinadi
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">

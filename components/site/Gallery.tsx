@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import ImageWithSkeleton from "./ImageWithSkeleton";
+import { youTubeEmbedUrl } from "@/lib/youtube";
 import { getGallery, type GalleryItem } from "@/lib/firestore";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
@@ -14,7 +15,9 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
-    getGallery().then(setItems).catch(() => {});
+    // Bosh sahifada 6 tasi ko'rsatiladi; "Barchasi" havolasi bor-yo'qligini
+    // bilish uchun bittasini ortiqcha so'raymiz.
+    getGallery(PREVIEW + 1).then(setItems).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -80,9 +83,18 @@ export default function Gallery() {
                 sizes={i === 0 ? "(max-width: 640px) 100vw, 66vw" : "(max-width: 640px) 50vw, 33vw"}
               />
               <div className="absolute inset-0 bg-black/0 transition-all group-hover:bg-black/30 flex items-center justify-center">
-                <svg className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803zM10.5 7.5v6m3-3h-6" />
-                </svg>
+                {item.videoId ? (
+                  // Video — "ijro etish" belgisi doim ko'rinib turadi
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 transition-transform group-hover:scale-110">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                ) : (
+                  <svg className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803zM10.5 7.5v6m3-3h-6" />
+                  </svg>
+                )}
               </div>
               {item.category && (
                 <span className="absolute left-2 top-2 rounded-full bg-black/50 px-2 py-0.5 text-xs text-white">
@@ -113,8 +125,20 @@ export default function Gallery() {
               className="relative max-h-[90vh] max-w-4xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={lightbox.url} alt={lightbox.caption ?? ""} className="max-h-[80vh] rounded-xl object-contain" />
+              {lightbox.videoId ? (
+                <div className="aspect-video w-[90vw] max-w-4xl overflow-hidden rounded-xl bg-black">
+                  <iframe
+                    src={youTubeEmbedUrl(lightbox.videoId, true)}
+                    title={lightbox.caption ?? "Video"}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={lightbox.url} alt={lightbox.caption ?? ""} className="max-h-[80vh] rounded-xl object-contain" />
+              )}
               {lightbox.caption && (
                 <p className="mt-3 text-center text-sm text-gray-300">{lightbox.caption}</p>
               )}

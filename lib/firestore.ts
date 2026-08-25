@@ -1,6 +1,8 @@
 import {
   collection, addDoc, getDocs, deleteDoc, doc, setDoc, writeBatch,
   orderBy, query, serverTimestamp, updateDoc, Timestamp,
+  where, limit as fsLimit, startAfter,
+  type QueryDocumentSnapshot, type DocumentData, type QueryConstraint,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "./firebase";
@@ -111,16 +113,39 @@ export async function deleteMessage(id: string): Promise<void> {
 // ── Galereya ──────────────────────────────────────────────────
 export interface GalleryItem {
   id: string;
+  /**
+   * Ko'rsatiladigan rasm: yuklangan fotosurat yoki (video bo'lsa)
+   * YouTube muqova rasmi. Shu sababli ro'yxat ko'rinishi ikkalasi
+   * uchun ham bir xil ishlaydi.
+   */
   url: string;
+  /** To'ldirilgan bo'lsa — bu YouTube videosi, bosilganda pleyer ochiladi */
+  videoId?: string;
   caption?: string;
   category?: string;
   createdAt?: unknown;
 }
 
-export async function getGallery(): Promise<GalleryItem[]> {
-  const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
+export async function getGallery(max?: number): Promise<GalleryItem[]> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (max) parts.push(fsLimit(max));
+  const snap = await getDocs(query(collection(db, "gallery"), ...parts));
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
+}
+
+/** Galereyani bo'lib-bo'lib yuklaydi (rasmlar soni o'sib borgani uchun). */
+export async function getGalleryPage(pageSize: number, after?: PageCursor): Promise<Page<GalleryItem>> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (after) parts.push(startAfter(after));
+  parts.push(fsLimit(pageSize + 1));
+
+  const snap = await getDocs(query(collection(db, "gallery"), ...parts));
+  const docs = snap.docs.slice(0, pageSize);
+  return {
+    items: docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) })),
+    cursor: docs.length ? docs[docs.length - 1] : null,
+    hasMore: snap.docs.length > pageSize,
+  };
 }
 
 export async function addGalleryItem(data: Omit<GalleryItem, "id" | "createdAt">): Promise<string> {
@@ -288,14 +313,62 @@ export interface NewsDoc {
   content?: string;
   image?: string;    // eski yozuvlar uchun (bitta rasm) — moslik saqlanadi
   images?: string[];  // yangi: bir nechta rasm, [0] — asosiy (muqova)
+  /** YouTube video ID — to'ldirilgan bo'lsa maqolada pleyer ko'rinadi */
+  videoId?: string;
   date: string;
   createdAt?: Timestamp;
 }
 
-export async function getNews(): Promise<NewsDoc[]> {
-  const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
+export async function getNews(max?: number): Promise<NewsDoc[]> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (max) parts.push(fsLimit(max));
+  const snap = await getDocs(query(collection(db, "news"), ...parts));
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<NewsDoc, "id">) }));
+}
+
+/** Sahifalash uchun kursor — Firestore hujjat suratini yashiradi. */
+export type PageCursor = QueryDocumentSnapshot<DocumentData>;
+
+export interface Page<T> {
+  items: T[];
+  cursor: PageCursor | null;
+  hasMore: boolean;
+}
+
+/**
+ * Yangiliklarni bo'lib-bo'lib yuklaydi.
+ *
+ * Ilgari ro'yxat sahifasi BARCHA yangiliklarni bir marta o'qirdi — arxiv
+ * o'sgan sari har bir tashrif qimmatlashib borardi. Endi faqat kerakli
+ * sahifa o'qiladi (`limit` + `startAfter` kursori).
+ */
+export async function getNewsPage(pageSize: number, after?: PageCursor): Promise<Page<NewsDoc>> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (after) parts.push(startAfter(after));
+  // Keyingi sahifa borligini bilish uchun bittasini ortiqcha so'raymiz
+  parts.push(fsLimit(pageSize + 1));
+
+  const snap = await getDocs(query(collection(db, "news"), ...parts));
+  const docs = snap.docs.slice(0, pageSize);
+  return {
+    items: docs.map((d) => ({ id: d.id, ...(d.data() as Omit<NewsDoc, "id">) })),
+    cursor: docs.length ? docs[docs.length - 1] : null,
+    hasMore: snap.docs.length > pageSize,
+  };
+}
+
+/**
+ * Bitta yangilikni slug bo'yicha topadi.
+ *
+ * Ilgari maqola sahifasi butun to'plamni yuklab, keyin `.find()` qilardi —
+ * bitta maqola uchun N ta hujjat o'qilardi. Endi bitta so'rov, bitta hujjat.
+ */
+export async function getNewsBySlug(slug: string): Promise<NewsDoc | null> {
+  const snap = await getDocs(
+    query(collection(db, "news"), where("slug", "==", slug), fsLimit(1))
+  );
+  const d = snap.docs[0];
+  return d ? { id: d.id, ...(d.data() as Omit<NewsDoc, "id">) } : null;
 }
 
 export async function addNews(data: Omit<NewsDoc, "id" | "createdAt">): Promise<string> {
