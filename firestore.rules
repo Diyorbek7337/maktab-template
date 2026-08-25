@@ -20,29 +20,18 @@ service cloud.firestore {
     match /schedule/{id}        { allow read: if true; allow write: if isAdmin(); }
 
     // ── Xabarlar (kontakt formasi) ──────────────────────────────
-    // Yozish client'dan EMAS, `/api/contact` route orqali Admin SDK bilan
-    // amalga oshiriladi (Admin SDK bu qoidalarni chetlab o'tadi). Shuning
-    // uchun bu yerda client uchun yozish butunlay yopilgan — aks holda
-    // istalgan odam ochiq API kalit bilan to'g'ridan-to'g'ri spam yozardi.
+    // Client'dan yozish BUTUNLAY yopiq. Ilgari `allow create: if true` edi va
+    // istalgan odam ochiq API kalit bilan cheksiz spam yoza olardi.
     //
-    // Quyidagi maydon/uzunlik tekshiruvlari — himoyaning ikkinchi qatlami:
-    // agar kelajakda client yozuvi qayta ochilsa, cheklovlar kuchda qoladi.
+    // Endi yozuv faqat `/api/contact` route orqali: u yerda rate limit va
+    // Zod validatsiyasi bor (name <= 100, body <= 3000 va h.k.), so'ng
+    // Admin SDK yozadi — Admin SDK bu qoidalarni chetlab o'tadi.
+    //
+    // Client yozuvi kelajakda qayta kerak bo'lsa, `if false` o'rniga maydon
+    // va uzunlik tekshiruvlari yozilishi shart (keys().hasOnly([...]),
+    // size() cheklovlari) — aks holda spam yo'li yana ochiladi.
     match /messages/{id} {
-      allow create: if false
-        && request.resource.data.keys().hasOnly(
-             ['name', 'phone', 'subject', 'body', 'read', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() >= 2
-        && request.resource.data.name.size() <= 100
-        && request.resource.data.phone is string
-        && request.resource.data.phone.size() >= 7
-        && request.resource.data.phone.size() <= 30
-        && request.resource.data.subject is string
-        && request.resource.data.subject.size() <= 100
-        && request.resource.data.body is string
-        && request.resource.data.body.size() >= 5
-        && request.resource.data.body.size() <= 3000
-        && request.resource.data.read == false;
+      allow create: if false;
 
       // Mijoz ma'lumotlari (ism, telefon) — faqat admin uchun.
       allow read, update, delete: if isAdmin();
