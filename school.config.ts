@@ -190,7 +190,9 @@ export const schoolConfig: SchoolConfig = {
   stats: [
     { value: "1200+", label: "Talabalar" },
     { value: "85", label: "O'qituvchilar" },
-    { value: "12", label: "Yo'nalishlar" },
+    // Diqqat: bu raqam quyidagi `majors` ro'yxati bilan mos bo'lishi kerak.
+    // Yangi yo'nalish qo'shsangiz, shu qiymatni ham yangilang.
+    { value: "8", label: "Yo'nalishlar" },
     { value: "30+", label: "Yillik tajriba" },
   ],
 
@@ -321,7 +323,7 @@ export const schoolConfig: SchoolConfig = {
     { student: "Rahimov Jasur", subject: "Veb-dasturlash", level: "Respublika", place: 1, year: 2026, teacher: "Karimova N." },
     { student: "Yusupova Kamola", subject: "Ingliz tili", level: "Viloyat", place: 1, year: 2026, teacher: "Ahmedova D." },
     { student: "Normatov Sherzod", subject: "Avtomexanika", level: "Viloyat", place: 2, year: 2025, teacher: "Tursunov B." },
-    { student: "Abdullayeva Nилуфар", subject: "Buxgalteriya hisobi", level: "Tuman", place: 1, year: 2026, teacher: "Hamidova Z." },
+    { student: "Abdullayeva Nilufar", subject: "Buxgalteriya hisobi", level: "Tuman", place: 1, year: 2026, teacher: "Hamidova Z." },
     { student: "Xoliqov Doniyor", subject: "Elektr montaj ishlari", level: "Viloyat", place: 3, year: 2025, teacher: "Olimov F." },
     { student: "Mirzayeva Sarvinoz", subject: "Tikuvchilik texnologiyasi", level: "Respublika", place: 2, year: 2024, teacher: "Sodiqova M." },
     { student: "Toshmatov Ulug'bek", subject: "Kompyuter tarmoqlari", level: "Xalqaro", place: 3, year: 2024 },

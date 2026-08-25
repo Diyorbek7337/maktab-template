@@ -6,13 +6,15 @@ import { motion } from "framer-motion";
 import { schoolConfig } from "@/school.config";
 import { fadeUp, stagger } from "@/lib/animations";
 
+// Footer barcha sahifalarda ko'rinadi, shuning uchun anchor havolalar
+// "/#about" ko'rinishida — aks holda ular faqat bosh sahifada ishlardi.
 const quickLinks = [
   { href: "/", label: "Bosh sahifa" },
-  { href: "#about", label: "Texnikum haqida" },
+  { href: "/#about", label: "Texnikum haqida" },
   { href: "/yonalishlar", label: "Yo'nalishlar" },
   { href: "/mamuriyat", label: "Ma'muriyat" },
   { href: "/news", label: "Yangiliklar" },
-  { href: "#contact", label: "Aloqa" },
+  { href: "/#contact", label: "Aloqa" },
 ];
 
 const socialIcons: Record<string, React.ReactNode> = {
