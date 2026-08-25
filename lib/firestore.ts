@@ -28,6 +28,23 @@ function stripUndefined(data: object): Record<string, unknown> {
 }
 
 /**
+ * Yangi hujjat qo'shadi.
+ *
+ * MUHIM: `stripUndefined` shu yerda majburiy. Formalar to'ldirilmagan
+ * maydonlarni `undefined` qilib yuboradi (masalan rasm tanlanmasa
+ * `images: undefined`), Firestore esa bunday qiymatni rad etadi —
+ * "Unsupported field value: undefined". Natijada, masalan, rasmsiz
+ * yangilik saqlash butunlay ishlamay qolgan edi.
+ */
+async function addWithTimestamp(col: string, data: object): Promise<string> {
+  const ref = await addDoc(collection(db, col), {
+    ...stripUndefined(data),
+    createdAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+/**
  * Yozuvni yangilaydi. Rasm almashtirilgan bo'lsa, eski rasm Storage'dan
  * o'chiriladi — aks holda u yetim bo'lib qolib, joyni egallab turaveradi.
  */
@@ -149,8 +166,7 @@ export async function getGalleryPage(pageSize: number, after?: PageCursor): Prom
 }
 
 export async function addGalleryItem(data: Omit<GalleryItem, "id" | "createdAt">): Promise<string> {
-  const ref = await addDoc(collection(db, "gallery"), { ...data, createdAt: serverTimestamp() });
-  return ref.id;
+  return addWithTimestamp("gallery", data);
 }
 
 export async function deleteGalleryItem(id: string, url?: string): Promise<void> {
@@ -167,11 +183,7 @@ export async function getTeachers(): Promise<TeacherDoc[]> {
 }
 
 export async function addTeacher(data: Teacher): Promise<string> {
-  const ref = await addDoc(collection(db, "teachers"), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+  return addWithTimestamp("teachers", data);
 }
 
 export async function updateTeacher(id: string, data: Teacher, prevImage?: string): Promise<void> {
@@ -192,12 +204,7 @@ export async function getStaff(): Promise<StaffDoc[]> {
 }
 
 export async function addStaff(data: StaffMember, order: number): Promise<string> {
-  const ref = await addDoc(collection(db, "administration"), {
-    ...data,
-    order,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+  return addWithTimestamp("administration", { ...data, order });
 }
 
 export async function updateStaffOrder(id: string, order: number): Promise<void> {
@@ -222,8 +229,7 @@ export async function getClubs(): Promise<ClubDoc[]> {
 }
 
 export async function addClub(data: Club): Promise<string> {
-  const ref = await addDoc(collection(db, "clubs"), { ...data, createdAt: serverTimestamp() });
-  return ref.id;
+  return addWithTimestamp("clubs", data);
 }
 
 export async function updateClub(id: string, data: Club, prevImage?: string): Promise<void> {
@@ -244,8 +250,7 @@ export async function getMajors(): Promise<MajorDoc[]> {
 }
 
 export async function addMajor(data: Major): Promise<string> {
-  const ref = await addDoc(collection(db, "majors"), { ...data, createdAt: serverTimestamp() });
-  return ref.id;
+  return addWithTimestamp("majors", data);
 }
 
 export async function updateMajor(id: string, data: Major, prevImage?: string): Promise<void> {
@@ -266,11 +271,7 @@ export async function getWinners(): Promise<WinnerDoc[]> {
 }
 
 export async function addWinner(data: OlympiadWinner): Promise<string> {
-  const ref = await addDoc(collection(db, "olympiadWinners"), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+  return addWithTimestamp("olympiadWinners", data);
 }
 
 export async function updateWinner(id: string, data: OlympiadWinner, prevImage?: string): Promise<void> {
@@ -291,8 +292,7 @@ export async function getAlumni(): Promise<AlumniDoc[]> {
 }
 
 export async function addAlumni(data: Alumni): Promise<string> {
-  const ref = await addDoc(collection(db, "alumni"), { ...data, createdAt: serverTimestamp() });
-  return ref.id;
+  return addWithTimestamp("alumni", data);
 }
 
 export async function updateAlumni(id: string, data: Alumni, prevImage?: string): Promise<void> {
@@ -372,8 +372,7 @@ export async function getNewsBySlug(slug: string): Promise<NewsDoc | null> {
 }
 
 export async function addNews(data: Omit<NewsDoc, "id" | "createdAt">): Promise<string> {
-  const ref = await addDoc(collection(db, "news"), { ...data, createdAt: serverTimestamp() });
-  return ref.id;
+  return addWithTimestamp("news", data);
 }
 
 /**
