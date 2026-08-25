@@ -1,5 +1,5 @@
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, setDoc,
+  collection, addDoc, getDocs, deleteDoc, doc, setDoc, writeBatch,
   orderBy, query, serverTimestamp, updateDoc, Timestamp,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
@@ -15,6 +15,68 @@ async function deleteStorageFile(url?: string): Promise<void> {
   } catch {
     // fayl topilmadi yoki allaqachon o'chirilgan — e'tiborsiz qoldiramiz
   }
+}
+
+// Firestore `undefined` qiymatni qabul qilmaydi — bo'sh maydonlar
+// yuborilmasligi kerak.
+function stripUndefined(data: object): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
+}
+
+/**
+ * Yozuvni yangilaydi. Rasm almashtirilgan bo'lsa, eski rasm Storage'dan
+ * o'chiriladi — aks holda u yetim bo'lib qolib, joyni egallab turaveradi.
+ */
+async function updateWithImage(
+  col: string,
+  id: string,
+  data: object,
+  prevImage?: string
+): Promise<void> {
+  const clean = stripUndefined(data);
+  const nextImage = typeof clean.image === "string" ? clean.image : undefined;
+  if (prevImage && prevImage !== nextImage) {
+    await deleteStorageFile(prevImage);
+  }
+  // Rasm olib tashlangan bo'lsa, maydonni ham tozalaymiz (stripUndefined
+  // uni tushirib qoldiradi, aks holda eski URL hujjatda qolib ketardi).
+  if (!nextImage && prevImage) clean.image = "";
+  await updateDoc(doc(db, col, id), clean);
+}
+
+/**
+ * `school.config.ts` dagi namuna ma'lumotlarni Firestore'ga ko'chiradi.
+ *
+ * Nima uchun kerak: ilgari sayt Firestore bo'sh bo'lganda config'dan
+ * o'qirdi, lekin admin BITTA yozuv qo'shishi bilan config'dagi qolgan
+ * hammasi saytdan yo'qolardi (`if (data.length) setX(data)`). Bir marta
+ * ko'chirilgandan keyin Firestore yagona manba bo'ladi va har bir yozuv
+ * tahrirlanadigan/o'chiriladigan bo'ladi.
+ */
+export async function seedCollection(
+  col: string,
+  items: readonly object[]
+): Promise<number> {
+  if (!items.length) return 0;
+
+  // Ustma-ust ko'chirib yubormaslik uchun avval bo'shligini tekshiramiz
+  const existing = await getDocs(collection(db, col));
+  if (!existing.empty) return 0;
+
+  const batch = writeBatch(db);
+  items.forEach((item, i) => {
+    const docRef = doc(collection(db, col));
+    batch.set(docRef, {
+      ...stripUndefined(item),
+      // Tartib config'dagidek saqlansin (createdAt desc bo'yicha o'qiladi)
+      order: i,
+      createdAt: serverTimestamp(),
+    });
+  });
+  await batch.commit();
+  return items.length;
 }
 
 // ── Xabarlar ──────────────────────────────────────────────────
@@ -87,6 +149,10 @@ export async function addTeacher(data: Teacher): Promise<string> {
   return ref.id;
 }
 
+export async function updateTeacher(id: string, data: Teacher, prevImage?: string): Promise<void> {
+  await updateWithImage("teachers", id, data, prevImage);
+}
+
 export async function deleteTeacher(id: string, image?: string): Promise<void> {
   await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "teachers", id))]);
 }
@@ -113,6 +179,10 @@ export async function updateStaffOrder(id: string, order: number): Promise<void>
   await updateDoc(doc(db, "administration", id), { order });
 }
 
+export async function updateStaff(id: string, data: StaffMember, prevImage?: string): Promise<void> {
+  await updateWithImage("administration", id, data, prevImage);
+}
+
 export async function deleteStaff(id: string, image?: string): Promise<void> {
   await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "administration", id))]);
 }
@@ -131,6 +201,10 @@ export async function addClub(data: Club): Promise<string> {
   return ref.id;
 }
 
+export async function updateClub(id: string, data: Club, prevImage?: string): Promise<void> {
+  await updateWithImage("clubs", id, data, prevImage);
+}
+
 export async function deleteClub(id: string, image?: string): Promise<void> {
   await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "clubs", id))]);
 }
@@ -147,6 +221,10 @@ export async function getMajors(): Promise<MajorDoc[]> {
 export async function addMajor(data: Major): Promise<string> {
   const ref = await addDoc(collection(db, "majors"), { ...data, createdAt: serverTimestamp() });
   return ref.id;
+}
+
+export async function updateMajor(id: string, data: Major, prevImage?: string): Promise<void> {
+  await updateWithImage("majors", id, data, prevImage);
 }
 
 export async function deleteMajor(id: string, image?: string): Promise<void> {
@@ -170,6 +248,10 @@ export async function addWinner(data: OlympiadWinner): Promise<string> {
   return ref.id;
 }
 
+export async function updateWinner(id: string, data: OlympiadWinner, prevImage?: string): Promise<void> {
+  await updateWithImage("olympiadWinners", id, data, prevImage);
+}
+
 export async function deleteWinner(id: string, image?: string): Promise<void> {
   await Promise.all([deleteStorageFile(image), deleteDoc(doc(db, "olympiadWinners", id))]);
 }
@@ -186,6 +268,10 @@ export async function getAlumni(): Promise<AlumniDoc[]> {
 export async function addAlumni(data: Alumni): Promise<string> {
   const ref = await addDoc(collection(db, "alumni"), { ...data, createdAt: serverTimestamp() });
   return ref.id;
+}
+
+export async function updateAlumni(id: string, data: Alumni, prevImage?: string): Promise<void> {
+  await updateWithImage("alumni", id, data, prevImage);
 }
 
 export async function deleteAlumni(id: string, image?: string): Promise<void> {
@@ -215,6 +301,21 @@ export async function getNews(): Promise<NewsDoc[]> {
 export async function addNews(data: Omit<NewsDoc, "id" | "createdAt">): Promise<string> {
   const ref = await addDoc(collection(db, "news"), { ...data, createdAt: serverTimestamp() });
   return ref.id;
+}
+
+/**
+ * Yangilikni yangilaydi. Tahrirlash paytida ro'yxatdan olib tashlangan
+ * rasmlar Storage'dan ham o'chiriladi.
+ */
+export async function updateNews(
+  id: string,
+  data: Omit<NewsDoc, "id" | "createdAt" | "slug">,
+  prevImages: string[] = []
+): Promise<void> {
+  const nextImages = data.images ?? [];
+  const removed = prevImages.filter((url) => !nextImages.includes(url));
+  await Promise.all(removed.map((url) => deleteStorageFile(url)));
+  await updateDoc(doc(db, "news", id), stripUndefined(data));
 }
 
 export async function deleteNews(id: string, images?: string[]): Promise<void> {

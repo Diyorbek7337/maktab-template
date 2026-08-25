@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
-import { getNews, addNews, deleteNews, type NewsDoc } from "@/lib/firestore";
+import { getNews, addNews, updateNews, deleteNews, type NewsDoc } from "@/lib/firestore";
 import { initialNews, formatDateUz, newsImages } from "@/lib/data";
 import { compressImage } from "@/lib/imageCompress";
 
@@ -26,8 +26,12 @@ export default function NewsAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
+  const [error, setError]       = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [prevImages, setPrevImages] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   async function load() {
     setLoading(true);
@@ -122,31 +126,65 @@ export default function NewsAdminPage() {
     });
   }
 
+  function startEdit(item: NewsDoc) {
+    const isStatic = initialNews.some((n) => String(n.id) === item.id);
+    if (isStatic) {
+      alert("Namuna yangiliklarni tahrirlab bo'lmaydi. O'z yangiligingizni qo'shing — namunalar avtomatik almashadi.");
+      return;
+    }
+    const imgs = newsImages(item);
+    setEditingId(item.id);
+    setPrevImages(imgs);
+    setTitle(item.title);
+    setCategory(CATEGORIES.includes(item.category) ? item.category : CATEGORIES[0]);
+    setExcerpt(item.excerpt);
+    setContent(item.content ?? "");
+    setImages(imgs);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function resetForm() {
+    setEditingId(null);
+    setPrevImages([]);
+    setTitle(""); setExcerpt(""); setContent("");
+    setCategory(CATEGORIES[0]); setImages([]);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !excerpt.trim()) return;
     setSaving(true);
+    setError("");
     try {
-      const date = new Date().toISOString().slice(0, 10);
-      const slug = `${slugify(title.trim())}-${Date.now()}`;
-      await addNews({
-        slug,
+      const payload = {
         title: title.trim(),
         category,
         excerpt: excerpt.trim(),
         content: content.trim() || undefined,
-        date,
+        date: new Date().toISOString().slice(0, 10),
         images: images.length ? images : undefined,
         image: images[0] || undefined,
-      });
-      setTitle(""); setExcerpt(""); setContent("");
-      setCategory(CATEGORIES[0]); setImages([]);
-      if (fileRef.current) fileRef.current.value = "";
+      };
+
+      if (editingId) {
+        // Sana va slug o'zgarmaydi — havolalar buzilmasligi uchun
+        const existing = news.find((n) => n.id === editingId);
+        await updateNews(
+          editingId,
+          { ...payload, date: existing?.date ?? payload.date },
+          prevImages
+        );
+      } else {
+        await addNews({ ...payload, slug: `${slugify(title.trim())}-${Date.now()}` });
+      }
+
+      resetForm();
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
       await load();
     } catch {
-      alert("Saqlashda xatolik. Firebase config ni tekshiring.");
+      setError("Saqlab bo'lmadi. Sessiya tugagan bo'lishi mumkin — sahifani yangilang.");
     } finally {
       setSaving(false);
     }
@@ -168,9 +206,17 @@ export default function NewsAdminPage() {
         <p className="mt-1 text-gray-500">Saytning yangiliklar bo'limini boshqaring.</p>
       </div>
 
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Forma */}
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 lg:col-span-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 lg:col-span-2">
+          <h3 className="font-semibold text-gray-900">
+            {editingId ? "Yangilikni tahrirlash" : "Yangi yangilik"}
+          </h3>
+
           <Field label="Sarlavha *">
             <input value={title} onChange={(e) => setTitle(e.target.value)}
               placeholder="Yangilik sarlavhasi" required className="input" />
@@ -251,11 +297,19 @@ export default function NewsAdminPage() {
             </label>
           </div>
 
-          <button type="submit" disabled={saving || uploading}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover transition-colors disabled:opacity-50">
-            {saving ? "Saqlanmoqda…" : "Saqlash va e'lon qilish"}
-          </button>
-          {saved && <p className="rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700">✓ Yangilik saytda chop etildi.</p>}
+          <div className="flex gap-2">
+            <button type="submit" disabled={saving || uploading}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover transition-colors disabled:opacity-50">
+              {saving ? "Saqlanmoqda…" : editingId ? "O'zgarishlarni saqlash" : "Saqlash va e'lon qilish"}
+            </button>
+            {editingId && (
+              <button type="button" onClick={resetForm}
+                className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-600 hover:border-gray-300 transition-colors">
+                Bekor
+              </button>
+            )}
+          </div>
+          {saved && <p className="rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700">✓ Saqlandi.</p>}
         </form>
 
         {/* Ro'yxat */}
@@ -281,10 +335,21 @@ export default function NewsAdminPage() {
                   <time className="mt-1 block text-xs text-gray-400">{formatDateUz(item.date)}</time>
                 </div>
               </div>
-              <button onClick={() => handleDelete(item)}
-                className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 transition-colors">
-                O'chirish
-              </button>
+              <div className="flex shrink-0 gap-1">
+                <button onClick={() => startEdit(item)} title="Tahrirlash"
+                  className="rounded-lg p-2 text-gray-400 hover:bg-primary/10 hover:text-primary transition-colors">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                  </svg>
+                </button>
+                <button onClick={() => handleDelete(item)} title="O'chirish"
+                  className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2" />
+                  </svg>
+                </button>
+              </div>
             </div>
             );
           })}
