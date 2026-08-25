@@ -1,6 +1,6 @@
 import {
   collection, addDoc, getDocs, deleteDoc, doc, setDoc, writeBatch,
-  orderBy, query, serverTimestamp, updateDoc, Timestamp,
+  orderBy, query, serverTimestamp, updateDoc, deleteField, Timestamp,
   where, limit as fsLimit, startAfter,
   type QueryDocumentSnapshot, type DocumentData, type QueryConstraint,
 } from "firebase/firestore";
@@ -19,11 +19,26 @@ async function deleteStorageFile(url?: string): Promise<void> {
   }
 }
 
-// Firestore `undefined` qiymatni qabul qilmaydi — bo'sh maydonlar
-// yuborilmasligi kerak.
+// Firestore `undefined` qiymatni qabul qilmaydi — YANGI hujjat yozishda
+// bo'sh maydonlar butunlay tushirib qoldiriladi.
 function stripUndefined(data: object): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(data).filter(([, v]) => v !== undefined)
+  );
+}
+
+/**
+ * YANGILASH uchun: bo'sh maydon `deleteField()` ga aylantiriladi.
+ *
+ * Bu yerda `stripUndefined` ishlatib bo'lmaydi — u maydonni umuman
+ * yubormaydi, ya'ni Firestore'dagi ESKI qiymat o'z joyida qoladi.
+ * Natijada admin video havolasini yoki to'liq matnni o'chirsa, ular
+ * saytda ko'rinaverardi; rasmlar esa Storage'dan o'chib, hujjatda
+ * buzilgan havola bo'lib qolardi.
+ */
+function forUpdate(data: object): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v])
   );
 }
 
@@ -54,15 +69,13 @@ async function updateWithImage(
   data: object,
   prevImage?: string
 ): Promise<void> {
-  const clean = stripUndefined(data);
-  const nextImage = typeof clean.image === "string" ? clean.image : undefined;
+  const next = data as { image?: string };
+  const nextImage = typeof next.image === "string" && next.image ? next.image : undefined;
+
   if (prevImage && prevImage !== nextImage) {
     await deleteStorageFile(prevImage);
   }
-  // Rasm olib tashlangan bo'lsa, maydonni ham tozalaymiz (stripUndefined
-  // uni tushirib qoldiradi, aks holda eski URL hujjatda qolib ketardi).
-  if (!nextImage && prevImage) clean.image = "";
-  await updateDoc(doc(db, col, id), clean);
+  await updateDoc(doc(db, col, id), forUpdate(data));
 }
 
 /**
@@ -84,16 +97,23 @@ export async function seedCollection(
   const existing = await getDocs(collection(db, col));
   if (!existing.empty) return 0;
 
+  // Diqqat: batch'dagi BARCHA hujjatlar bir xil `serverTimestamp()` oladi,
+  // shuning uchun `orderBy("createdAt","desc")` ularni tasodifiy tartibda
+  // qaytaradi — config'dagi tartib butunlay buzilardi. Har biriga aniq,
+  // bir millisekundga farq qiluvchi vaqt beramiz: birinchi element eng
+  // "yangi" bo'ladi va ro'yxatda birinchi turadi.
+  const base = Date.now();
   const batch = writeBatch(db);
+
   items.forEach((item, i) => {
     const docRef = doc(collection(db, col));
     batch.set(docRef, {
       ...stripUndefined(item),
-      // Tartib config'dagidek saqlansin (createdAt desc bo'yicha o'qiladi)
       order: i,
-      createdAt: serverTimestamp(),
+      createdAt: Timestamp.fromMillis(base - i),
     });
   });
+
   await batch.commit();
   return items.length;
 }
@@ -387,7 +407,7 @@ export async function updateNews(
   const nextImages = data.images ?? [];
   const removed = prevImages.filter((url) => !nextImages.includes(url));
   await Promise.all(removed.map((url) => deleteStorageFile(url)));
-  await updateDoc(doc(db, "news", id), stripUndefined(data));
+  await updateDoc(doc(db, "news", id), forUpdate(data));
 }
 
 export async function deleteNews(id: string, images?: string[]): Promise<void> {
