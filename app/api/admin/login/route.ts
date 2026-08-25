@@ -1,99 +1,105 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getAdminAuth } from "@/lib/firebaseAdmin";
+import {
+  ADMIN_COOKIE,
+  SESSION_MAX_AGE,
+  createSessionToken,
+  safeCompare,
+} from "@/lib/auth";
+import {
+  LOGIN_RATE_LIMIT,
+  getClientIp,
+  rateLimit,
+  resetRateLimit,
+} from "@/lib/rate-limit";
+import { firstIssueMessage, loginSchema } from "@/lib/validation";
 
-// 15 daqiqada 10 ta urinishdan ko'p bo'lsa bloklash
-const attempts = new Map<string, { count: number; resetAt: number }>();
-const MAX_ATTEMPTS = 10;
-const WINDOW_MS = 15 * 60 * 1000; // 15 daqiqa
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
-
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const record = attempts.get(ip);
-
-  if (!record || now > record.resetAt) {
-    attempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_ATTEMPTS - 1 };
-  }
-
-  if (record.count >= MAX_ATTEMPTS) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  record.count++;
-  return { allowed: true, remaining: MAX_ATTEMPTS - record.count };
-}
+// firebase-admin Node API'lariga tayanadi — Edge'da ishlamaydi.
+export const runtime = "nodejs";
+// Javob hech qachon keshlanmasin
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  // 1) Rate limit — holat Upstash Redis yoki Firestore'da (umumiy), shuning
+  //    uchun serverless nusxalar orasida ham haqiqatan ishlaydi.
   const ip = getClientIp(req);
-  const { allowed, remaining } = checkRateLimit(ip);
+  const limit = await rateLimit(ip, LOGIN_RATE_LIMIT);
 
-  if (!allowed) {
+  if (!limit.success) {
     return NextResponse.json(
-      { error: "Juda ko'p urinish. 15 daqiqadan so'ng qayta urinib ko'ring." },
+      { error: "Juda ko'p urinish. Birozdan so'ng qayta urinib ko'ring." },
       {
         status: 429,
-        headers: { "Retry-After": "900" },
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
       }
     );
   }
 
-  const body = await req.json().catch(() => ({}));
-  const { password } = body;
+  // 2) Runtime validatsiya — kelayotgan JSON'ga umuman ishonilmaydi
+  const raw = await req.json().catch(() => null);
+  const parsed = loginSchema.safeParse(raw);
 
-  if (!password || typeof password !== "string") {
-    return NextResponse.json({ error: "Parol kiritilmagan" }, { status: 400 });
-  }
-
-  // Belgilar soni cheklovi (DoS oldini olish)
-  if (password.length > 200) {
-    return NextResponse.json({ error: "Parol noto'g'ri" }, { status: 401 });
-  }
-
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword || password !== adminPassword) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: `Parol noto'g'ri. ${remaining} ta urinish qoldi.` },
-      { status: 401 }
+      { error: firstIssueMessage(parsed.error) },
+      { status: 400 }
     );
   }
 
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.error("[login] ADMIN_PASSWORD env o'zgaruvchisi sozlanmagan");
     return NextResponse.json(
       { error: "Server konfiguratsiya xatosi" },
       { status: 500 }
     );
   }
 
-  // Muvaffaqiyatli kirish — urinishlar tozalanadi
-  attempts.delete(ip);
+  // 3) Timing-attack'ga chidamli solishtirish (oddiy `!==` emas)
+  const passwordOk = await safeCompare(parsed.data.password, adminPassword);
+  if (!passwordOk) {
+    // Qolgan urinishlar soni ataylab oshkor qilinmaydi — bu hujumchiga
+    // limitni kuzatish imkonini berardi.
+    return NextResponse.json({ error: "Parol noto'g'ri" }, { status: 401 });
+  }
 
-  // Firebase Auth uchun custom token — client shu bilan Firestore/Storage'ga
-  // autentifikatsiyalangan holda yoza oladi (rules: request.auth != null).
-  let token: string;
+  // Parol to'g'ri — hisoblagich tozalanadi, aks holda bir necha marta
+  // xato yozgan admin kirganidan keyin ham bloklangan qolardi.
+  await resetRateLimit(ip, LOGIN_RATE_LIMIT);
+
+  // 4) Firebase Auth custom token — client shu bilan Firestore/Storage'ga
+  //    autentifikatsiyalangan holda yozadi (rules: request.auth != null).
+  let firebaseToken: string;
   try {
-    token = await getAdminAuth().createCustomToken("admin");
-  } catch {
+    firebaseToken = await getAdminAuth().createCustomToken("admin", {
+      role: "admin",
+    });
+  } catch (err) {
+    console.error("[login] Firebase custom token yaratilmadi:", err);
     return NextResponse.json(
       { error: "Firebase Admin sozlanmagan. FIREBASE_ADMIN_* qiymatlarini tekshiring." },
       { status: 500 }
     );
   }
 
-  const res = NextResponse.json({ ok: true, token });
-  res.cookies.set("admin_session", secret, {
+  // 5) Imzolangan, muddati cheklangan sessiya JWT'si
+  let sessionToken: string;
+  try {
+    sessionToken = await createSessionToken();
+  } catch (err) {
+    console.error("[login] Sessiya tokeni yaratilmadi:", err);
+    return NextResponse.json(
+      { error: "Server konfiguratsiya xatosi" },
+      { status: 500 }
+    );
+  }
+
+  const res = NextResponse.json({ ok: true, token: firebaseToken });
+  res.cookies.set(ADMIN_COOKIE, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",   // "lax" emas, "strict" — CSRF himoyasi
-    maxAge: 60 * 60 * 8, // 7 kun emas, 8 soat
+    sameSite: "strict", // CSRF himoyasi
+    maxAge: SESSION_MAX_AGE, // 8 soat, JWT `exp` bilan bir xil
     path: "/",
   });
 

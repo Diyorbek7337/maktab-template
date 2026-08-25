@@ -1,5 +1,6 @@
 import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 // Faqat serverda, so'rov kelganda chaqiriladi (build vaqtida emas) —
 // aks holda Next.js "collect page data" bosqichida env yo'qligida qulab tushadi.
@@ -19,4 +20,10 @@ function getAdminApp(): App {
 
 export function getAdminAuth(): Auth {
   return getAuth(getAdminApp());
+}
+
+// Admin SDK Firestore xavfsizlik qoidalarini chetlab o'tadi — shuning uchun
+// faqat serverda tekshirilgan (validatsiyadan o'tgan) yozuvlar uchun ishlating.
+export function getAdminDb(): Firestore {
+  return getFirestore(getAdminApp());
 }

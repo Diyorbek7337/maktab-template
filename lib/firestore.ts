@@ -34,12 +34,9 @@ export async function getMessages(): Promise<Message[]> {
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Message, "id">) }));
 }
 
-export async function sendMessage(data: Omit<Message, "id" | "read" | "createdAt">): Promise<string> {
-  const ref = await addDoc(collection(db, "messages"), {
-    ...data, read: false, createdAt: serverTimestamp(),
-  });
-  return ref.id;
-}
+// Diqqat: xabar yozish client'dan olib tashlangan. Kontakt formasi
+// `/api/contact` route orqali yozadi (rate limit + Zod validatsiyasi bilan),
+// va Firestore qoidalari client yozuvini rad etadi.
 
 export async function markMessageRead(id: string): Promise<void> {
   await updateDoc(doc(db, "messages", id), { read: true });

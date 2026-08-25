@@ -139,13 +139,12 @@ export interface SchoolConfig {
   // --- Foydali manbalar ---
   usefulLinks: UsefulLink[];
 
-  // --- Admin panel paroli endi ADMIN_PASSWORD env o'zgaruvchisida (.env.local) ---
-
-  // --- Telegram bildirishnoma (xabar yuborilganda) ---
-  telegramNotify?: {
-    botToken: string; // @BotFather dan olingan token
-    chatId: string;   // admin chat ID
-  };
+  // --- MAXFIY qiymatlar bu faylda SAQLANMAYDI ---
+  // Bu fayl git'ga commit qilinadi, shuning uchun sirlar .env.local da:
+  //   ADMIN_PASSWORD       — admin panelga kirish paroli
+  //   ADMIN_SECRET         — sessiya JWT'sini imzolash kaliti
+  //   TELEGRAM_BOT_TOKEN   — @BotFather dan olingan token
+  //   TELEGRAM_CHAT_ID     — bildirishnoma yuboriladigan chat ID
 
   // --- Havolalar ---
   social: SocialLinks;
@@ -446,8 +445,8 @@ export const schoolConfig: SchoolConfig = {
 
   mapEmbedUrl: "",
 
-  // Telegram bildirishnoma uchun: @BotFather dan bot yarating
-  // telegramNotify: { botToken: "123456:ABC...", chatId: "-1001234567890" },
+  // Telegram bildirishnoma uchun: @BotFather dan bot yarating va tokenni
+  // .env.local ga TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID sifatida qo'shing.
 
   theme: {
     primary: "#2563eb",

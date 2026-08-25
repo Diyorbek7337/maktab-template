@@ -3,23 +3,55 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin() {
+      return request.auth != null;
+    }
+
     // Ommaviy tarkib: sayt uchun hamma o'qiy oladi, faqat login qilgan
     // admin (Firebase Auth custom token orqali) yoza oladi.
-    match /news/{id}            { allow read: if true; allow write: if request.auth != null; }
-    match /gallery/{id}         { allow read: if true; allow write: if request.auth != null; }
-    match /teachers/{id}        { allow read: if true; allow write: if request.auth != null; }
-    match /administration/{id}  { allow read: if true; allow write: if request.auth != null; }
-    match /clubs/{id}           { allow read: if true; allow write: if request.auth != null; }
-    match /majors/{id}          { allow read: if true; allow write: if request.auth != null; }
-    match /olympiadWinners/{id} { allow read: if true; allow write: if request.auth != null; }
-    match /alumni/{id}          { allow read: if true; allow write: if request.auth != null; }
-    match /schedule/{id}        { allow read: if true; allow write: if request.auth != null; }
+    match /news/{id}            { allow read: if true; allow write: if isAdmin(); }
+    match /gallery/{id}         { allow read: if true; allow write: if isAdmin(); }
+    match /teachers/{id}        { allow read: if true; allow write: if isAdmin(); }
+    match /administration/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /clubs/{id}           { allow read: if true; allow write: if isAdmin(); }
+    match /majors/{id}          { allow read: if true; allow write: if isAdmin(); }
+    match /olympiadWinners/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /alumni/{id}          { allow read: if true; allow write: if isAdmin(); }
+    match /schedule/{id}        { allow read: if true; allow write: if isAdmin(); }
 
-    // Xabarlar: har kim yozishi (kontakt forma) mumkin, lekin faqat
-    // admin o'qiy/o'zgartira/o'chira oladi — mijoz ma'lumotlari himoyalangan.
+    // ── Xabarlar (kontakt formasi) ──────────────────────────────
+    // Yozish client'dan EMAS, `/api/contact` route orqali Admin SDK bilan
+    // amalga oshiriladi (Admin SDK bu qoidalarni chetlab o'tadi). Shuning
+    // uchun bu yerda client uchun yozish butunlay yopilgan — aks holda
+    // istalgan odam ochiq API kalit bilan to'g'ridan-to'g'ri spam yozardi.
+    //
+    // Quyidagi maydon/uzunlik tekshiruvlari — himoyaning ikkinchi qatlami:
+    // agar kelajakda client yozuvi qayta ochilsa, cheklovlar kuchda qoladi.
     match /messages/{id} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow create: if false
+        && request.resource.data.keys().hasOnly(
+             ['name', 'phone', 'subject', 'body', 'read', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 7
+        && request.resource.data.phone.size() <= 30
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() <= 100
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 5
+        && request.resource.data.body.size() <= 3000
+        && request.resource.data.read == false;
+
+      // Mijoz ma'lumotlari (ism, telefon) — faqat admin uchun.
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Rate limit hisoblagichlari faqat server (Admin SDK) uchun —
+    // client hech qanday holatda ko'ra yoki o'zgartira olmasin.
+    match /_rateLimits/{id} {
+      allow read, write: if false;
     }
 
     match /{document=**} {

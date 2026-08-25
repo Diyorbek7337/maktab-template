@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { schoolConfig } from "@/school.config";
-import { sendMessage } from "@/lib/firestore";
 import { fadeUp, stagger, slideLeft, slideRight } from "@/lib/animations";
 
 const SUBJECTS = [
@@ -22,30 +21,39 @@ export default function Contact() {
   const { address, phones, email, workingHours, mapEmbedUrl } = schoolConfig;
   const [form, setForm] = useState(blank());
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim() || !form.body.trim()) return;
     setStatus("sending");
+    setErrorMsg("");
 
     try {
-      await sendMessage({
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        subject: form.subject,
-        body: form.body.trim(),
-      });
-
-      // Telegram bildirishnoma (xatolik bo'lsa ham xabar saqlanadi)
-      fetch("/api/notify", {
+      // Firestore'ga to'g'ridan-to'g'ri emas — server route orqali yoziladi
+      // (u yerda rate limit va Zod validatsiyasi bor).
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      }).catch(() => {});
+        body: JSON.stringify({
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          subject: form.subject,
+          body: form.body.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrorMsg(data.error ?? "Xatolik yuz berdi. Qayta urinib ko'ring.");
+        setStatus("error");
+        return;
+      }
 
       setStatus("sent");
       setForm(blank());
     } catch {
+      setErrorMsg("Server bilan bog'lanib bo'lmadi.");
       setStatus("error");
     }
   }
@@ -191,7 +199,7 @@ export default function Contact() {
 
                   {status === "error" && (
                     <p className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-                      Xatolik yuz berdi. Qayta urinib ko'ring.
+                      {errorMsg || "Xatolik yuz berdi. Qayta urinib ko'ring."}
                     </p>
                   )}
 
