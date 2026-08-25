@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { getNews, addNews, updateNews, deleteNews, type NewsDoc } from "@/lib/firestore";
-import { initialNews, formatDateUz, newsImages } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages, newsCover } from "@/lib/data";
 import { compressImage } from "@/lib/imageCompress";
 import { parseYouTubeId, youTubeThumbnail } from "@/lib/youtube";
 
@@ -356,7 +356,7 @@ export default function NewsAdminPage() {
             {loading ? "Yuklanmoqda…" : `Jami: ${news.length} ta yangilik`}
           </h3>
           {news.map((item) => {
-            const cover = newsImages(item)[0];
+            const cover = newsCover(item);
             return (
             <div key={item.id} className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4">
               <div className="flex gap-3 min-w-0">

@@ -6,7 +6,7 @@ import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
 import { getNewsPage, type NewsDoc, type PageCursor } from "@/lib/firestore";
-import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
+import { initialNews, formatDateUz, newsCover, type NewsItem } from "@/lib/data";
 
 type AnyNews = NewsDoc | (NewsItem & { id: string | number });
 
@@ -83,7 +83,7 @@ export default function NewsPage() {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {news.map((item) => {
-                const cover = newsImages(item)[0];
+                const cover = newsCover(item);
                 return (
                 <Link
                   key={String(item.id)}
@@ -99,6 +99,13 @@ export default function NewsPage() {
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
+                      {"videoId" in item && item.videoId && (
+                        <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <div className="flex h-48 items-center justify-center bg-primary/5">

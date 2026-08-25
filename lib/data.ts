@@ -1,5 +1,7 @@
 // Namuna ma'lumotlar. Haqiqiy loyihada bu yerni bazaga (API) ulaysiz.
 
+import { youTubeThumbnail } from "./youtube";
+
 const UZ_MONTHS = [
   "yanvar", "fevral", "mart", "aprel", "may", "iyun",
   "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
@@ -15,6 +17,22 @@ export function formatDateUz(iso: string): string {
 export function newsImages(item: { image?: string; images?: string[] }): string[] {
   if (item.images?.length) return item.images;
   return item.image ? [item.image] : [];
+}
+
+/**
+ * Ro'yxatlarda ko'rsatiladigan muqova.
+ *
+ * Rasm yuklanmagan, lekin video biriktirilgan bo'lsa — YouTube muqovasi
+ * ishlatiladi. Aks holda yangilik ro'yxatda bo'sh kulrang katak bo'lib
+ * turardi, holbuki videoning tayyor muqovasi bor edi.
+ */
+export function newsCover(
+  item: { image?: string; images?: string[]; videoId?: string }
+): string | undefined {
+  const [first] = newsImages(item);
+  if (first) return first;
+  if (item.videoId) return youTubeThumbnail(item.videoId);
+  return undefined;
 }
 
 export interface NewsItem {

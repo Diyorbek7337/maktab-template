@@ -69,6 +69,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
       },
+      {
+        // Rasmsiz, lekin videoli yangiliklarda muqova sifatida
+        // YouTube'ning tayyor muqova rasmi ishlatiladi
+        protocol: "https",
+        hostname: "i.ytimg.com",
+      },
     ],
   },
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import ImageWithSkeleton from "./ImageWithSkeleton";
 import { getNews, type NewsDoc } from "@/lib/firestore";
-import { initialNews, formatDateUz, newsImages, type NewsItem } from "@/lib/data";
+import { initialNews, formatDateUz, newsCover, type NewsItem } from "@/lib/data";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
 type AnyNews = NewsDoc | (NewsItem & { id: string | number });
@@ -56,7 +56,7 @@ export default function News() {
           viewport={{ once: true, amount: 0.1 }}
         >
           {news.slice(0, PREVIEW).map((item) => {
-            const cover = newsImages(item)[0];
+            const cover = newsCover(item);
             return (
             <motion.div key={String(item.id)} variants={scaleIn}>
               <Link
@@ -72,6 +72,13 @@ export default function News() {
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
+                    {'videoId' in item && item.videoId && (
+                      <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="flex h-48 w-full items-center justify-center bg-primary/5">

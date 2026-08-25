@@ -5,7 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
-import { initialNews, formatDateUz, newsImages } from "@/lib/data";
+import { initialNews, formatDateUz, newsImages, newsCover } from "@/lib/data";
 import { youTubeEmbedUrl } from "@/lib/youtube";
 import { schoolConfig } from "@/school.config";
 import { getNewsBySlug } from "@/lib/firestore";
@@ -32,14 +32,16 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!/^[a-z0-9-]{1,100}$/.test(params.id)) return {};
   const item = await findArticle(params.id);
   if (!item) return {};
-  const images = newsImages(item);
+  // Rasm bo'lmasa video muqovasi ishlatiladi — ijtimoiy tarmoqlarda
+  // ulashilganda havola bo'sh ko'rinmasligi uchun
+  const cover = newsCover(item);
   return {
     title: item.title,
     description: item.excerpt,
     openGraph: {
       title: `${item.title} | ${schoolConfig.shortName}`,
       description: item.excerpt,
-      images: images.length ? [{ url: images[0] }] : [],
+      images: cover ? [{ url: cover }] : [],
     },
   };
 }
@@ -113,6 +115,21 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
                 {item.title}
               </h1>
 
+              {/* Video matndan OLDIN — maqolaning asosiy mazmuni ko'pincha
+                  aynan videoda bo'ladi, uni pastda qidirish kerak emas. */}
+              {"videoId" in item && item.videoId && (
+                <div className="mt-6 aspect-video w-full overflow-hidden rounded-xl bg-black">
+                  <iframe
+                    src={youTubeEmbedUrl(item.videoId)}
+                    title={item.title}
+                    className="h-full w-full"
+                    loading="lazy"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+
               <div className="mt-6 space-y-4 text-gray-700 leading-relaxed">
                 {blocks.map((block, i) =>
                   block.type === "image" ? (
@@ -130,21 +147,6 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
                   )
                 )}
               </div>
-
-              {"videoId" in item && item.videoId && (
-                <div className="mt-8">
-                  <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-                    <iframe
-                      src={youTubeEmbedUrl(item.videoId)}
-                      title={item.title}
-                      className="h-full w-full"
-                      loading="lazy"
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                </div>
-              )}
 
               {gallery.length > 0 && (
                 <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
