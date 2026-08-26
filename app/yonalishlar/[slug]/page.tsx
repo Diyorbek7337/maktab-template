@@ -31,9 +31,10 @@ const findMajor = cache(async (slug: string) => {
 });
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
-  const major = await findMajor(params.slug);
+  const { slug } = await params;
+  const major = await findMajor(slug);
   if (!major) return {};
   return {
     title: major.name,
@@ -47,13 +48,14 @@ export async function generateMetadata(
 }
 
 export default async function MajorDetailPage(
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const major = await findMajor(params.slug);
+  const { slug } = await params;
+  const major = await findMajor(slug);
   if (!major) notFound();
 
   const majors = await loadMajors();
-  const others = majors.filter((m) => majorSlug(m.name) !== params.slug).slice(0, 3);
+  const others = majors.filter((m) => majorSlug(m.name) !== slug).slice(0, 3);
 
   return (
     <>

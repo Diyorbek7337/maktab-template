@@ -28,9 +28,12 @@ const findArticle = cache(async (slug: string) => {
   }
 });
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  if (!/^[a-z0-9-]{1,100}$/.test(params.id)) return {};
-  const item = await findArticle(params.id);
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+  const { id } = await params;
+  if (!/^[a-z0-9-]{1,100}$/.test(id)) return {};
+  const item = await findArticle(id);
   if (!item) return {};
   // Rasm bo'lmasa video muqovasi ishlatiladi — ijtimoiy tarmoqlarda
   // ulashilganda havola bo'sh ko'rinmasligi uchun
@@ -46,10 +49,13 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function NewsDetailPage({ params }: { params: { id: string } }) {
-  if (!/^[a-z0-9-]{1,100}$/.test(params.id)) notFound();
+export default async function NewsDetailPage(
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  if (!/^[a-z0-9-]{1,100}$/.test(id)) notFound();
 
-  const item = await findArticle(params.id);
+  const item = await findArticle(id);
   if (!item) notFound();
 
   const paragraphs = ((item as { content?: string }).content ?? item.excerpt)
