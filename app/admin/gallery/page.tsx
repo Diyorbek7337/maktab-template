@@ -6,15 +6,16 @@ import { storage } from "@/lib/firebase";
 import { getGalleryPage, addGalleryItem, deleteGalleryItem, type GalleryItem, type PageCursor } from "@/lib/firestore";
 import { compressImage } from "@/lib/imageCompress";
 import { parseYouTubeId, youTubeThumbnail } from "@/lib/youtube";
+import { GALLERY_CATEGORIES } from "@/lib/data";
 
-const CATEGORIES = ["Umumiy", "Tadbirlar", "Sport", "Fanlar", "Sayohat", "Bitiruvchilar"];
+const CATEGORIES = GALLERY_CATEGORIES;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const PAGE_SIZE = 30;
 
 export default function GalleryAdminPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [caption, setCaption] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

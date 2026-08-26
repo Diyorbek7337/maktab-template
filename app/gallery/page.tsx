@@ -8,35 +8,46 @@ import Footer from "@/components/site/Footer";
 import { getGalleryPage, type GalleryItem, type PageCursor } from "@/lib/firestore";
 import { youTubeEmbedUrl } from "@/lib/youtube";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
+import { GALLERY_CATEGORIES } from "@/lib/data";
 
 const ALL = "Barchasi";
 const PAGE_SIZE = 24;
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
-  const [active, setActive] = useState(ALL);
+  const [active, setActive] = useState<string>(ALL);
   const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState<PageCursor | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  // Filtr o'zgarganda ro'yxat ham, kursor ham noldan boshlanadi —
+  // saralash Firestore'da bajariladi, brauzerda emas.
   useEffect(() => {
-    getGalleryPage(PAGE_SIZE)
+    let cancelled = false;
+    setLoading(true);
+
+    getGalleryPage(PAGE_SIZE, undefined, active === ALL ? undefined : active)
       .then((page) => {
+        if (cancelled) return;
         setItems(page.items);
         setCursor(page.cursor);
         setHasMore(page.hasMore);
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => { if (!cancelled) { setItems([]); setHasMore(false); } })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [active]);
 
   async function loadMore() {
     if (!cursor || loadingMore) return;
     setLoadingMore(true);
     try {
-      const page = await getGalleryPage(PAGE_SIZE, cursor);
+      const page = await getGalleryPage(
+        PAGE_SIZE, cursor, active === ALL ? undefined : active
+      );
       setItems((prev) => [...prev, ...page.items]);
       setCursor(page.cursor);
       setHasMore(page.hasMore);
@@ -53,8 +64,12 @@ export default function GalleryPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const categories = [ALL, ...Array.from(new Set(items.map((i) => i.category).filter(Boolean)))];
-  const filtered = active === ALL ? items : items.filter((i) => i.category === active);
+  // Filtr ro'yxati barqaror: yuklangan rasmlardan emas, kategoriyalar
+  // ro'yxatidan olinadi — aks holda keyingi sahifadagi kategoriya
+  // tugmasi umuman chiqmasdi.
+  const categories: string[] = [ALL, ...GALLERY_CATEGORIES];
+  // Saralash Firestore'da bajarilgani uchun bu yerda qo'shimcha filtr shart emas
+  const filtered = items;
 
   return (
     <>
@@ -78,7 +93,7 @@ export default function GalleryPage() {
               {categories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActive(cat ?? ALL)}
+                  onClick={() => setActive(cat)}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
                     active === cat
                       ? "bg-primary text-white shadow-sm"

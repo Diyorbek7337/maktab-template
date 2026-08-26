@@ -78,8 +78,15 @@ export default function AdministrationAdminPage() {
     };
 
     try {
-      if (editingId) await updateStaff(editingId, payload, prevImage);
-      else await addStaff(payload, staff.length);
+      if (editingId) {
+        await updateStaff(editingId, payload, prevImage);
+      } else {
+        // `staff.length` emas, mavjud eng katta `order` + 1.
+        // O'rtadagi xodim o'chirilgach uzunlik kamayadi va yangi xodim
+        // mavjud tartib raqami bilan to'qnashib, ro'yxat aralashib ketardi.
+        const nextOrder = staff.reduce((max, s) => Math.max(max, s.order ?? 0), -1) + 1;
+        await addStaff(payload, nextOrder);
+      }
       cancelEdit();
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);

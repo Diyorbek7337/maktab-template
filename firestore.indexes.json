@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "_comment": "Galereyani kategoriya bo'yicha saralab, sana bo'yicha sahifalash uchun (app/gallery). Bunday kompozit so'rov indekssiz ishlamaydi.",
+      "collectionGroup": "gallery",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

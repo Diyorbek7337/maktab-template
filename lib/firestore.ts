@@ -129,10 +129,26 @@ export interface Message {
   createdAt?: Timestamp;
 }
 
-export async function getMessages(): Promise<Message[]> {
-  const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
+export async function getMessages(max?: number): Promise<Message[]> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (max) parts.push(fsLimit(max));
+  const snap = await getDocs(query(collection(db, "messages"), ...parts));
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Message, "id">) }));
+}
+
+/** Murojaatlarni bo'lib-bo'lib yuklaydi (vaqt o'tishi bilan to'planadi). */
+export async function getMessagesPage(pageSize: number, after?: PageCursor): Promise<Page<Message>> {
+  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+  if (after) parts.push(startAfter(after));
+  parts.push(fsLimit(pageSize + 1));
+
+  const snap = await getDocs(query(collection(db, "messages"), ...parts));
+  const docs = snap.docs.slice(0, pageSize);
+  return {
+    items: docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Message, "id">) })),
+    cursor: docs.length ? docs[docs.length - 1] : null,
+    hasMore: snap.docs.length > pageSize,
+  };
 }
 
 // Diqqat: xabar yozish client'dan olib tashlangan. Kontakt formasi
@@ -170,9 +186,22 @@ export async function getGallery(max?: number): Promise<GalleryItem[]> {
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
 }
 
-/** Galereyani bo'lib-bo'lib yuklaydi (rasmlar soni o'sib borgani uchun). */
-export async function getGalleryPage(pageSize: number, after?: PageCursor): Promise<Page<GalleryItem>> {
-  const parts: QueryConstraint[] = [orderBy("createdAt", "desc")];
+/**
+ * Galereyani bo'lib-bo'lib yuklaydi.
+ *
+ * `category` berilsa saralash Firestore'da bajariladi. Buni brauzerda
+ * qilib bo'lmaydi: xotirada faqat joriy sahifa bor, ya'ni keyingi
+ * sahifalardagi mos rasmlar filtrga tushmay qolardi.
+ * (Kerakli kompozit indeks — `firestore.indexes.json` da.)
+ */
+export async function getGalleryPage(
+  pageSize: number,
+  after?: PageCursor,
+  category?: string
+): Promise<Page<GalleryItem>> {
+  const parts: QueryConstraint[] = [];
+  if (category) parts.push(where("category", "==", category));
+  parts.push(orderBy("createdAt", "desc"));
   if (after) parts.push(startAfter(after));
   parts.push(fsLimit(pageSize + 1));
 

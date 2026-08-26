@@ -1,31 +1,69 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMessages, markMessageRead, deleteMessage, type Message } from "@/lib/firestore";
+import { getMessagesPage, markMessageRead, deleteMessage, type Message, type PageCursor } from "@/lib/firestore";
 import { formatDateUz } from "@/lib/data";
+
+const PAGE_SIZE = 25;
 
 export default function MessagesAdminPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [cursor, setCursor] = useState<PageCursor | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    getMessages().then(setMessages).catch(() => {}).finally(() => setLoading(false));
+    getMessagesPage(PAGE_SIZE)
+      .then((page) => {
+        setMessages(page.items);
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
+      })
+      // Ilgari bu xato jimgina yutilardi va admin bo'sh ro'yxat ko'rib,
+      // "murojaat yo'q" deb o'ylardi.
+      .catch(() => setError("Murojaatlarni yuklab bo'lmadi. Sahifani yangilang yoki qaytadan kiring."))
+      .finally(() => setLoading(false));
   }, []);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await getMessagesPage(PAGE_SIZE, cursor);
+      setMessages((prev) => [...prev, ...page.items]);
+      setCursor(page.cursor);
+      setHasMore(page.hasMore);
+    } catch {
+      setError("Keyingi murojaatlarni yuklab bo'lmadi.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function handleOpen(msg: Message) {
     setOpen(open === msg.id ? null : msg.id);
     if (!msg.read) {
-      await markMessageRead(msg.id).catch(() => {});
-      setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, read: true } : m));
+      try {
+        await markMessageRead(msg.id);
+        setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, read: true } : m));
+      } catch {
+        setError("Xabarni o'qilgan deb belgilab bo'lmadi.");
+      }
     }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Xabarni o'chirishni tasdiqlaysizmi?")) return;
-    await deleteMessage(id).catch(() => {});
-    setMessages((prev) => prev.filter((m) => m.id !== id));
-    if (open === id) setOpen(null);
+    try {
+      await deleteMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+      if (open === id) setOpen(null);
+    } catch {
+      setError("O'chirib bo'lmadi. Sahifani yangilab qayta urinib ko'ring.");
+    }
   }
 
   const unread = messages.filter((m) => !m.read).length;
@@ -43,6 +81,10 @@ export default function MessagesAdminPage() {
           </span>
         )}
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       {loading ? (
         <p className="text-gray-400">Yuklanmoqda…</p>
@@ -135,6 +177,18 @@ export default function MessagesAdminPage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {!loading && hasMore && (
+        <div className="text-center">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-lg border-2 border-primary px-6 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+          >
+            {loadingMore ? "Yuklanmoqda…" : "Ko'proq yuklash"}
+          </button>
         </div>
       )}
     </div>

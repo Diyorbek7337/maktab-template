@@ -62,6 +62,19 @@ export interface NewsItem {
   image?: string;
 }
 
+/**
+ * Galereya kategoriyalari — admin forma va ommaviy filtr uchun YAGONA manba.
+ *
+ * Filtr ro'yxatini yuklangan rasmlardan hosil qilib bo'lmaydi: sahifalash
+ * joriy etilgandan keyin faqat birinchi sahifa xotirada bo'ladi va keyingi
+ * sahifalardagi kategoriyalar filtrda umuman ko'rinmay qolardi.
+ */
+export const GALLERY_CATEGORIES = [
+  "Umumiy", "Tadbirlar", "Sport", "Fanlar", "Sayohat", "Bitiruvchilar",
+] as const;
+
+export type GalleryCategory = (typeof GALLERY_CATEGORIES)[number];
+
 export interface ScheduleEntry {
   time: string; // "08:30 – 09:15"
   subject: string;
