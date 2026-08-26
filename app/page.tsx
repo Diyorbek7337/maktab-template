@@ -13,10 +13,8 @@ export const metadata: Metadata = {
 };
 import Hero from "@/components/site/Hero";
 import About from "@/components/site/About";
-import Majors from "@/components/site/Majors";
 import Schedule from "@/components/site/Schedule";
 import History from "@/components/site/History";
-import Teachers from "@/components/site/Teachers";
 import OlympiadWinners from "@/components/site/OlympiadWinners";
 import Gallery from "@/components/site/Gallery";
 import Clubs from "@/components/site/Clubs";
@@ -30,16 +28,14 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      {/* Tartib: tashrifchi ko'p qidiradigan narsa yuqorida.
-          Yo'nalishlar va yangiliklar — eng talab qilinadigan ikkita bo'lim,
-          shuning uchun ular boshida. Tarix eng uzun bo'lim bo'lgani va
-          shoshilinch ma'lumot bo'lmagani uchun pastga tushirilgan. */}
+      {/* Yo'nalishlar, o'qituvchilar va rahbariyat bu yerda EMAS — ular
+          alohida sahifalarda va menyudan ochiladi. Bosh sahifa yangilik va
+          kundalik ma'lumot uchun qoldi; yo'nalishlarga Hero'dagi tugma
+          ham olib boradi. */}
       <main>
         <Hero />
         <About />
-        <Majors />
         <News />
-        <Teachers />
         <Schedule />
         <Gallery />
         <Clubs />

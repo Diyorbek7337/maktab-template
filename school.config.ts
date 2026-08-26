@@ -423,18 +423,23 @@ export const schoolConfig: SchoolConfig = {
   usefulLinks: [
     {
       title: "O'zbekiston Respublikasi Prezidentining rasmiy sayti",
-      url: "https://president.uz",
+      url: "https://president.uz/uz",
       logo: "https://president.uz/favicon.ico",
     },
     {
-      title: "Yagona interaktiv davlat xizmatlari portali",
-      url: "https://my.gov.uz",
-      logo: "https://my.gov.uz/favicon.ico",
+      title: "Maktabgacha va maktab ta'limi vazirligi",
+      url: "https://gov.uz/oz/uzedu",
+      logo: "https://gov.uz/favicon.ico",
     },
     {
-      title: "Edu.uz — ta'lim portali",
-      url: "https://edu.uz",
-      logo: "https://edu.uz/favicon.ico",
+      title: "Oliy ta'lim, fan va innovatsiyalar vazirligi",
+      url: "https://gov.uz/oz/edu",
+      logo: "https://gov.uz/favicon.ico",
+    },
+    {
+      title: "Yagona interaktiv davlat xizmatlari portali",
+      url: "https://my.gov.uz/uz",
+      logo: "https://my.gov.uz/favicon.ico",
     },
   ],
 
