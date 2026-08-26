@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { schoolConfig } from "@/school.config";
+import SearchDialog from "./SearchDialog";
 
 const navLinks = [
   { href: "#hero",         label: "Bosh sahifa",     type: "hash" },
@@ -17,7 +18,20 @@ const navLinks = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
+
+  // Ctrl/Cmd+K — qidiruvni klaviaturadan ochish
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Bosh sahifada emas bo'lsa hash linklar ishllamaydi — /#about ga yo'naltiramiz
   function resolveHref(href: string, type: string) {
@@ -66,21 +80,45 @@ export default function Navbar() {
               </a>
             )
           )}
+
+          <button
+            onClick={() => setSearchOpen(true)}
+            aria-label="Saytdan qidirish"
+            title="Qidirish (Ctrl+K)"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:border-primary hover:text-primary"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            Qidirish
+          </button>
+
           {/* "Admin panel" tugmasi ataylab yo'q: u tashrifchilarga kerak emas
               va panel manzilini bexosdan e'lon qilib turardi. Xodimlar
               /admin manzilini to'g'ridan-to'g'ri kiritadi. */}
         </nav>
 
-        {/* Mobil tugma */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="md:hidden text-gray-700 hover:text-primary"
-          aria-label="Menyuni ochish"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {open ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 12h18M3 6h18M3 18h18" />}
-          </svg>
-        </button>
+        {/* Mobil: qidiruv + menyu */}
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="p-2 text-gray-700 hover:text-primary"
+            aria-label="Saytdan qidirish"
+          >
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="p-2 text-gray-700 hover:text-primary"
+            aria-label="Menyuni ochish"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {open ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 12h18M3 6h18M3 18h18" />}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mobil menyu */}
@@ -109,6 +147,8 @@ export default function Navbar() {
           )}
         </nav>
       )}
+
+      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }
