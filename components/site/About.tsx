@@ -25,7 +25,7 @@ export default function About() {
 
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-20">
+      <div className="mx-auto max-w-6xl px-4 py-14">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
 
           {/* Chap: texnikum rasmi */}

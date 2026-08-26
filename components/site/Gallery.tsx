@@ -32,7 +32,7 @@ export default function Gallery() {
 
   return (
     <section id="gallery" className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-20">
+      <div className="mx-auto max-w-6xl px-4 py-14">
 
         <motion.div
           className="flex items-end justify-between"
@@ -53,7 +53,7 @@ export default function Gallery() {
         </motion.div>
 
         {items.length === 0 ? (
-          <div className="mt-10 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-20 text-gray-400">
+          <div className="mt-10 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-14 text-gray-400">
             <svg className="h-12 w-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

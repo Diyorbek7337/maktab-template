@@ -16,7 +16,6 @@ import About from "@/components/site/About";
 import Majors from "@/components/site/Majors";
 import Schedule from "@/components/site/Schedule";
 import History from "@/components/site/History";
-import Administration from "@/components/site/Administration";
 import Teachers from "@/components/site/Teachers";
 import OlympiadWinners from "@/components/site/OlympiadWinners";
 import Gallery from "@/components/site/Gallery";
@@ -31,19 +30,22 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
+      {/* Tartib: tashrifchi ko'p qidiradigan narsa yuqorida.
+          Yo'nalishlar va yangiliklar — eng talab qilinadigan ikkita bo'lim,
+          shuning uchun ular boshida. Tarix eng uzun bo'lim bo'lgani va
+          shoshilinch ma'lumot bo'lmagani uchun pastga tushirilgan. */}
       <main>
         <Hero />
         <About />
         <Majors />
-        <History />
-        <Administration />
+        <News />
         <Teachers />
         <Schedule />
-        <OlympiadWinners />
         <Gallery />
         <Clubs />
+        <OlympiadWinners />
         <Alumni />
-        <News />
+        <History />
         <UsefulLinks />
         <Contact />
       </main>
