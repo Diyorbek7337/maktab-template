@@ -18,6 +18,7 @@ export default function ScheduleAdminPage() {
   const [subject, setSubject] = useState("");
   const [teacher, setTeacher] = useState("");
   const [room, setRoom]       = useState("");
+  const [group, setGroup]     = useState("");
 
   useEffect(() => {
     getSchedule()
@@ -44,6 +45,7 @@ export default function ScheduleAdminPage() {
       subject: subject.trim(),
       teacher: teacher.trim() || "—",
       room: room.trim() || "—",
+      ...(group.trim() ? { group: group.trim() } : {}),
     };
     setSchedule((prev) => ({ ...prev, [activeDay]: [...prev[activeDay], entry] }));
     setDirty(true);
@@ -74,6 +76,14 @@ export default function ScheduleAdminPage() {
   }
 
   const rows = schedule[activeDay];
+
+  // Taklif uchun: butun haftada uchragan guruh nomlari
+  const knownGroups: string[] = Array.from(
+    new Set(
+      WEEKDAYS.flatMap((d) => (schedule[d] ?? []).map((r) => r.group))
+        .filter((g): g is string => Boolean(g))
+    )
+  ).sort();
 
   return (
     <div className="space-y-6">
@@ -136,20 +146,30 @@ export default function ScheduleAdminPage() {
       {/* Qo'shish formasi */}
       <form
         onSubmit={handleAdd}
-        className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-5"
+        className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-6"
       >
+        <input value={group} onChange={(e) => setGroup(e.target.value)}
+          placeholder="Guruh (KT-21)" className="input"
+          aria-label="Guruh nomi"
+          list="admin-schedule-groups" />
         <input value={time} onChange={(e) => setTime(e.target.value)}
-          placeholder="08:30 – 09:15" className="input" />
+          placeholder="08:30 – 09:15" className="input" aria-label="Dars vaqti" />
         <input value={subject} onChange={(e) => setSubject(e.target.value)}
-          placeholder="Fan nomi" required className="input" />
+          placeholder="Fan nomi" required className="input" aria-label="Fan nomi" />
         <input value={teacher} onChange={(e) => setTeacher(e.target.value)}
-          placeholder="O'qituvchi" className="input" />
+          placeholder="O'qituvchi" className="input" aria-label="O'qituvchi" />
         <input value={room} onChange={(e) => setRoom(e.target.value)}
-          placeholder="Xona" className="input" />
+          placeholder="Xona" className="input" aria-label="Xona" />
         <button type="submit"
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors">
           + Qo'shish
         </button>
+        {/* Mavjud guruhlar taklif qilinadi — har safar qo'lda
+            yozilaverib "KT-21" va "KT21" kabi turlicha yozuvlar
+            paydo bo'lmasligi uchun */}
+        <datalist id="admin-schedule-groups">
+          {knownGroups.map((g) => <option key={g} value={g} />)}
+        </datalist>
       </form>
 
       {/* Jadval */}
@@ -157,6 +177,7 @@ export default function ScheduleAdminPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-primary/5 text-primary">
+              <th className="px-4 py-3 font-semibold">Guruh</th>
               <th className="px-4 py-3 font-semibold">Vaqt</th>
               <th className="px-4 py-3 font-semibold">Fan</th>
               <th className="px-4 py-3 font-semibold">O'qituvchi</th>
@@ -167,13 +188,22 @@ export default function ScheduleAdminPage() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
                   {activeDay} uchun darslar qo'shilmagan.
                 </td>
               </tr>
             ) : (
               rows.map((row, i) => (
                 <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-primary/5 transition-colors">
+                  <td className="px-4 py-3">
+                    {row.group ? (
+                      <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        {row.group}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-medium text-gray-900">{row.time}</td>
                   <td className="px-4 py-3 text-gray-700">{row.subject}</td>
                   <td className="px-4 py-3 text-gray-500">{row.teacher}</td>

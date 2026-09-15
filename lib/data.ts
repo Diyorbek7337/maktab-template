@@ -80,6 +80,8 @@ export interface ScheduleEntry {
   subject: string;
   teacher: string;
   room: string;
+  /** Guruh nomi, masalan "KT-21". Eski yozuvlarda bo'lmasligi mumkin. */
+  group?: string;
 }
 
 export const WEEKDAYS = [
@@ -131,30 +133,30 @@ export const initialNews: NewsItem[] = [
 
 export const initialSchedule: Record<Weekday, ScheduleEntry[]> = {
   Dushanba: [
-    { time: "08:30 – 09:15", subject: "Matematika", teacher: "N. Karimova", room: "201" },
-    { time: "09:25 – 10:10", subject: "Ona tili", teacher: "S. Yusupov", room: "105" },
-    { time: "10:20 – 11:05", subject: "Ingliz tili", teacher: "D. Ahmedova", room: "302" },
-    { time: "11:15 – 12:00", subject: "Fizika", teacher: "B. Tursunov", room: "204" },
+    { time: "08:30 – 09:15", subject: "Matematika", teacher: "N. Karimova", room: "201", group: "KT-21" },
+    { time: "09:25 – 10:10", subject: "Ona tili", teacher: "S. Yusupov", room: "105", group: "KT-21" },
+    { time: "10:20 – 11:05", subject: "Ingliz tili", teacher: "D. Ahmedova", room: "302", group: "KT-21" },
+    { time: "11:15 – 12:00", subject: "Fizika", teacher: "B. Tursunov", room: "204", group: "KT-21" },
   ],
   Seshanba: [
-    { time: "08:30 – 09:15", subject: "Kimyo", teacher: "G. Rasulova", room: "203" },
-    { time: "09:25 – 10:10", subject: "Tarix", teacher: "F. Olimov", room: "108" },
-    { time: "10:20 – 11:05", subject: "Geometriya", teacher: "N. Karimova", room: "201" },
+    { time: "08:30 – 09:15", subject: "Kimyo", teacher: "G. Rasulova", room: "203", group: "EL-22" },
+    { time: "09:25 – 10:10", subject: "Tarix", teacher: "F. Olimov", room: "108", group: "EL-22" },
+    { time: "10:20 – 11:05", subject: "Geometriya", teacher: "N. Karimova", room: "201", group: "KT-21" },
   ],
   Chorshanba: [
-    { time: "08:30 – 09:15", subject: "Kompyuter tarmoqlari (amaliyot)", teacher: "Z. Hamidova", room: "Ustaxona-2" },
-    { time: "09:25 – 10:10", subject: "Adabiyot", teacher: "S. Yusupov", room: "105" },
-    { time: "10:20 – 11:05", subject: "Informatika", teacher: "A. Qodirov", room: "301" },
+    { time: "08:30 – 09:15", subject: "Kompyuter tarmoqlari (amaliyot)", teacher: "Z. Hamidova", room: "Ustaxona-2", group: "KT-21" },
+    { time: "09:25 – 10:10", subject: "Adabiyot", teacher: "S. Yusupov", room: "105", group: "EL-22" },
+    { time: "10:20 – 11:05", subject: "Informatika", teacher: "A. Qodirov", room: "301", group: "KT-21" },
   ],
   Payshanba: [
-    { time: "08:30 – 09:15", subject: "Matematika", teacher: "N. Karimova", room: "201" },
-    { time: "09:25 – 10:10", subject: "Kasb etikasi", teacher: "M. Sodiqova", room: "107" },
+    { time: "08:30 – 09:15", subject: "Matematika", teacher: "N. Karimova", room: "201", group: "KT-21" },
+    { time: "09:25 – 10:10", subject: "Kasb etikasi", teacher: "M. Sodiqova", room: "107", group: "EL-22" },
   ],
   Juma: [
-    { time: "08:30 – 09:15", subject: "Ingliz tili", teacher: "D. Ahmedova", room: "302" },
-    { time: "09:25 – 10:10", subject: "Jismoniy tarbiya", teacher: "R. Aliyev", room: "Sport zal" },
+    { time: "08:30 – 09:15", subject: "Ingliz tili", teacher: "D. Ahmedova", room: "302", group: "KT-21" },
+    { time: "09:25 – 10:10", subject: "Jismoniy tarbiya", teacher: "R. Aliyev", room: "Sport zal", group: "KT-21" },
   ],
   Shanba: [
-    { time: "08:30 – 09:15", subject: "Tarbiyaviy soat", teacher: "Guruh rahbari", room: "—" },
+    { time: "08:30 – 09:15", subject: "Tarbiyaviy soat", teacher: "Guruh rahbari", room: "—", group: "KT-21" },
   ],
 };
