@@ -1,0 +1,10 @@
+# Netlify Next.js'ni o'zi taniydi va @netlify/plugin-nextjs (OpenNext)
+# orqali quradi: API route'lar funksiya, middleware esa edge'da ishlaydi.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Next.js telemetriyasini build serverida o'chiramiz
+  NEXT_TELEMETRY_DISABLED = "1"

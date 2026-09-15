@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // ============================================================
 // Serverless-mos rate limiting.
 //
-// Vercel'da har bir so'rov boshqa (yoki cold-start bo'lgan) funksiya
+// Serverless platformada har bir so'rov boshqa (yoki cold-start bo'lgan) funksiya
 // nusxasiga tushishi mumkin — shu sababli jarayon xotirasidagi Map
 // himoya bermaydi. Holat tashqi umumiy saqlagichda turishi shart:
 //
@@ -47,18 +47,24 @@ export const NOTIFY_RATE_LIMIT: RateLimitConfig = {
 /**
  * Client IP — rate limit kaliti sifatida ishlatiladi.
  *
- * Muhim: `x-forwarded-for` ni client O'ZI ham yubora oladi, ya'ni uni
- * bevosita ishonchli deb bo'lmaydi. Vercel o'zi o'rnatadigan sarlavhalar
- * (`x-vercel-forwarded-for`, `x-real-ip`) platformada qayta yoziladi va
- * soxtalashtirib bo'lmaydi — shuning uchun ular birinchi o'rinda turadi.
+ * Muhim: `x-forwarded-for` va `x-real-ip` ni client O'ZI ham yubora
+ * oladi. Agar platforma ularni qayta yozmasa, hujumchi har urinishda
+ * boshqa IP yozib limitni chetlab o'tadi — admin parolini cheksiz
+ * taxmin qilish imkoniyati paydo bo'ladi. Shuning uchun faqat
+ * platformaning o'zi o'rnatadigan sarlavhalarga ishoniladi:
+ *   - Netlify: `x-nf-client-connection-ip`
+ *   - Vercel:  `x-vercel-forwarded-for`; `x-real-ip` ham faqat Vercel'da
+ *     (u yerda platforma uni qayta yozadi, boshqa joyda — kafolat yo'q)
  */
 export function getClientIp(req: NextRequest): string {
-  const trusted =
-    req.headers.get("x-vercel-forwarded-for") ?? req.headers.get("x-real-ip");
-  if (trusted?.trim()) return trusted.split(",")[0].trim();
+  const platform =
+    req.headers.get("x-nf-client-connection-ip") ??
+    req.headers.get("x-vercel-forwarded-for") ??
+    (process.env.VERCEL ? req.headers.get("x-real-ip") : null);
+  if (platform?.trim()) return platform.split(",")[0].trim();
 
-  // Vercel'dan tashqarida (masalan mahalliy dev yoki boshqa proxy ortida)
-  const forwarded = req.headers.get("x-forwarded-for");
+  // Platformadan tashqarida (mahalliy dev yoki boshqa proxy ortida)
+  const forwarded = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();
     if (first) return first;
