@@ -149,6 +149,8 @@ export interface SchoolConfig {
   // --- Havolalar ---
   social: SocialLinks;
   mapEmbedUrl?: string;
+  /** Xaritani Google Maps ilovasida ochish havolasi (yo'l topish uchun) */
+  mapLink?: string;
 
   // --- Brending ---
   theme: SchoolTheme;
@@ -450,7 +452,9 @@ export const schoolConfig: SchoolConfig = {
     youtube: "https://youtube.com/@texnikum1",
   },
 
-  mapEmbedUrl: "",
+  // Koordinata: 38.038355, 67.781066. `output=embed` — API kalitisiz ishlaydigan ko'rinish
+  mapEmbedUrl: "https://maps.google.com/maps?q=38.038355,67.781066&z=16&output=embed",
+  mapLink: "https://maps.google.com/maps?q=38.038355,67.781066&ll=38.038355,67.781066&z=16",
 
   // Telegram bildirishnoma uchun: @BotFather dan bot yarating va tokenni
   // .env.local ga TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID sifatida qo'shing.

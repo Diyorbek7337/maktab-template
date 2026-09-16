@@ -18,7 +18,7 @@ const SUBJECTS = [
 const blank = () => ({ name: "", phone: "", subject: SUBJECTS[0], body: "", website: "" });
 
 export default function Contact() {
-  const { address, phones, email, workingHours, mapEmbedUrl } = schoolConfig;
+  const { address, phones, email, workingHours, mapEmbedUrl, mapLink } = schoolConfig;
   const [form, setForm] = useState(blank());
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -116,6 +116,19 @@ export default function Contact() {
                 </div>
               )}
             </div>
+            {mapLink && (
+              <a
+                href={mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover"
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+                </svg>
+                Google Maps&apos;da ochish va yo&apos;l topish
+              </a>
+            )}
           </motion.div>
 
           {/* O'ng: xabar yuborish formasi */}
