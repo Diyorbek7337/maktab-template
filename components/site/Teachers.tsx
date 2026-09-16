@@ -77,7 +77,9 @@ export default function Teachers() {
                   <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                     {teacher.subject}
                   </span>
-                  <span className="text-xs text-gray-400">{teacher.experience} yil</span>
+                  {teacher.experience != null && (
+                    <span className="text-xs text-gray-400">{teacher.experience} yil</span>
+                  )}
                 </div>
                 {teacher.achievement && (
                   <div className="mt-2 flex items-start gap-1.5">
@@ -90,12 +92,14 @@ export default function Teachers() {
               </div>
 
               {/* Tajriba — pastki o'ng burchak */}
+              {teacher.experience != null && (
               <div className="absolute bottom-4 right-4 text-right">
                 <div className="text-lg font-bold text-primary/20 group-hover:text-primary/40 transition-colors">
                   {teacher.experience}
                 </div>
                 <div className="text-[10px] text-gray-300 group-hover:text-gray-400 transition-colors">yil</div>
               </div>
+              )}
             </motion.div>
           ))}
         </motion.div>

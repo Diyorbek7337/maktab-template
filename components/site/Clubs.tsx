@@ -146,9 +146,11 @@ export default function Clubs() {
                 <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
                   {club.name}
                 </h3>
-                <p className="mt-2 text-sm text-gray-500 leading-relaxed line-clamp-3">
-                  {club.description}
-                </p>
+                {club.description && (
+                  <p className="mt-2 text-sm text-gray-500 leading-relaxed line-clamp-3">
+                    {club.description}
+                  </p>
+                )}
 
                 {/* Meta */}
                 <div className="mt-4 space-y-1.5">

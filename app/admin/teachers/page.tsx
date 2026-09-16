@@ -8,11 +8,16 @@ import {
 } from "@/lib/firestore";
 import { schoolConfig } from "@/school.config";
 
-const SUBJECTS = ["Kompyuter tarmoqlari", "Buxgalteriya hisobi", "Tikuvchilik texnologiyasi",
-  "Avtomexanika", "Elektr ta'minoti", "Oshpazlik", "Sartaroshlik", "Qurilish ishlari",
-  "Matematika", "Ingliz tili", "Ona tili va adabiyot", "Informatika", "Jismoniy tarbiya", "Boshqa"];
+// Fan erkin yoziladi — bu ro'yxat faqat taklif. Ilgari qat'iy ro'yxat edi va
+// unda yo'q fan (masalan "Payvandlovchi") tahrirlashda jimgina "Boshqa" ga
+// almashib saqlanardi.
+const SUBJECT_SUGGESTIONS = Array.from(new Set([
+  ...schoolConfig.majors.map((m) => m.name),
+  "Informatika", "Ingliz tili", "Ona tili va adabiyot", "Matematika", "Fizika", "Tarix", "Jismoniy tarbiya",
+]));
 
-const blank = () => ({ name: "", subject: SUBJECTS[0], experience: 1, achievement: "", image: "" });
+// Tajriba ixtiyoriy: "" — noma'lum
+const blank = () => ({ name: "", subject: "", experience: "" as number | "", achievement: "", image: "" });
 
 export default function TeachersAdminPage() {
   const [teachers, setTeachers] = useState<TeacherDoc[]>([]);
@@ -52,8 +57,8 @@ export default function TeachersAdminPage() {
     setPrevImage(t.image);
     setForm({
       name: t.name,
-      subject: SUBJECTS.includes(t.subject) ? t.subject : "Boshqa",
-      experience: t.experience,
+      subject: t.subject,
+      experience: t.experience ?? "",
       achievement: t.achievement ?? "",
       image: t.image ?? "",
     });
@@ -72,8 +77,8 @@ export default function TeachersAdminPage() {
 
     if (!editingId && usingConfig) {
       const ok = confirm(
-        `Diqqat: ${schoolConfig.teachers.length} ta namuna o'qituvchi hali bazaga ko'chirilmagan.\n\n` +
-        `Hozir yangi o'qituvchi qo'shsangiz, namunalar saytdan yo'qoladi.\n\nBaribir davom etasizmi?`
+        `Diqqat: ${schoolConfig.teachers.length} ta o'qituvchi hali bazaga ko'chirilmagan.\n\n` +
+        `Hozir yangi o'qituvchi qo'shsangiz, ular saytdan yo'qoladi.\n\nBaribir davom etasizmi?`
       );
       if (!ok) return;
     }
@@ -82,8 +87,8 @@ export default function TeachersAdminPage() {
     setError("");
     const payload = {
       name: form.name.trim(),
-      subject: form.subject,
-      experience: form.experience,
+      subject: form.subject.trim(),
+      experience: form.experience === "" ? undefined : Number(form.experience),
       achievement: form.achievement.trim() || undefined,
       image: form.image.trim() || undefined,
     };
@@ -148,14 +153,17 @@ export default function TeachersAdminPage() {
           </Field>
 
           <Field label="Fan / yo'nalish">
-            <select value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} className="input">
-              {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
-            </select>
+            <input value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+              list="teacher-subjects" placeholder="Masalan: Payvandlovchi" required className="input" />
+            <datalist id="teacher-subjects">
+              {SUBJECT_SUGGESTIONS.map((s) => <option key={s} value={s} />)}
+            </datalist>
           </Field>
 
-          <Field label="Tajriba (yil)">
-            <input type="number" min={1} max={50} value={form.experience}
-              onChange={(e) => setForm((f) => ({ ...f, experience: Number(e.target.value) }))} className="input" />
+          <Field label="Tajriba, yil (ixtiyoriy)">
+            <input type="number" min={0} max={60} value={form.experience}
+              onChange={(e) => setForm((f) => ({ ...f, experience: e.target.value === "" ? "" : Number(e.target.value) }))}
+              className="input" />
           </Field>
 
           <Field label="Yutuq / Unvon (ixtiyoriy)">
@@ -202,10 +210,10 @@ export default function TeachersAdminPage() {
                   <div className="font-semibold text-gray-900 truncate">{t.name}</div>
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary font-medium">{t.subject}</span>
-                    <span>{t.experience} yil</span>
+                    {t.experience != null && <span>{t.experience} yil</span>}
                   </div>
                   {t.achievement && <p className="mt-1 truncate text-xs text-gray-400">{t.achievement}</p>}
-                  {!isReal && <p className="mt-1 text-xs text-amber-600">Namuna — bazaga ko'chirilmagan</p>}
+                  {!isReal && <p className="mt-1 text-xs text-amber-600">Saytda ko'rinadi, lekin bazaga ko'chirilmagan</p>}
                 </div>
                 {isReal && (
                   <div className="flex shrink-0 gap-1">

@@ -8,6 +8,7 @@ import ImageWithSkeleton from "@/components/site/ImageWithSkeleton";
 import { schoolConfig, type Major } from "@/school.config";
 import { getMajors, type MajorDoc } from "@/lib/firestore";
 import { majorSlug } from "@/lib/data";
+import AdmissionInfo from "@/components/site/AdmissionInfo";
 
 type MajorItem = Major | MajorDoc;
 
@@ -30,6 +31,13 @@ const findMajor = cache(async (slug: string) => {
   return majors.find((m) => majorSlug(m.name) === slug) ?? null;
 });
 
+function metaDescription(major: MajorItem): string {
+  if (major.description) return major.description;
+  const a = schoolConfig.admission;
+  const work = major.workplaces ? ` Bitiruvchilar: ${major.workplaces.toLowerCase()} ishlaydi.` : "";
+  return `${major.name} — ${a.duration}, ${a.studyForm.toLowerCase()}. ${a.document}.${work}`;
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -38,10 +46,10 @@ export async function generateMetadata(
   if (!major) return {};
   return {
     title: major.name,
-    description: major.description,
+    description: metaDescription(major),
     openGraph: {
       title: `${major.name} | ${schoolConfig.shortName}`,
-      description: major.description,
+      description: metaDescription(major),
       images: major.image ? [{ url: major.image }] : [],
     },
   };
@@ -112,43 +120,41 @@ export default async function MajorDetailPage(
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path d="M12 15a4 4 0 100-8 4 4 0 000 8z" /><path d="M8.5 14.5 6 22l6-3 6 3-2.5-7.5" />
                     </svg>
-                    Beriladigan malaka
+                    Bitiruvchiga beriladi
                   </dt>
                   <dd className="mt-1.5 font-semibold text-gray-900">{major.qualification}</dd>
                 </div>
               </dl>
 
-              <div className="mt-8">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-                  Yo&apos;nalish haqida
-                </h2>
-                <p className="mt-3 leading-relaxed text-gray-700">{major.description}</p>
-              </div>
-
-              <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5">
-                <p className="font-medium text-gray-900">Shu yo&apos;nalishda o&apos;qimoqchimisiz?</p>
-                <p className="mt-1 text-sm text-gray-600">
-                  Qabul shartlari va hujjatlar bo&apos;yicha biz bilan bog&apos;laning.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <Link
-                    href="/#contact"
-                    className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
-                  >
-                    Ariza qoldirish
-                  </Link>
-                  {schoolConfig.phones[0] && (
-                    <a
-                      href={`tel:${schoolConfig.phones[0].replace(/\s/g, "")}`}
-                      className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary hover:text-primary"
-                    >
-                      📞 {schoolConfig.phones[0]}
-                    </a>
-                  )}
+              {major.description && (
+                <div className="mt-8">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+                    Yo&apos;nalish haqida
+                  </h2>
+                  <p className="mt-3 leading-relaxed text-gray-700">{major.description}</p>
                 </div>
-              </div>
+              )}
+
+              {major.workplaces && (
+                <div className="mt-8">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+                    Bitiruvchilar qayerda ishlaydi
+                  </h2>
+                  <p className="mt-3 flex items-start gap-2 leading-relaxed text-gray-700">
+                    <svg className="mt-1 h-5 w-5 shrink-0 text-primary/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                    </svg>
+                    {major.workplaces}
+                  </p>
+                </div>
+              )}
+
             </div>
           </article>
+
+          <div className="mt-8">
+            <AdmissionInfo title="Shu yo'nalishda o'qimoqchimisiz?" />
+          </div>
 
           {others.length > 0 && (
             <div className="mt-10">

@@ -54,7 +54,7 @@ export default function ClubsAdminPage() {
     setEditingId(c.id);
     setForm({
       name: c.name,
-      description: c.description,
+      description: c.description ?? "",
       category: c.category,
       teacher: c.teacher ?? "",
       schedule: c.schedule ?? "",
@@ -72,12 +72,12 @@ export default function ClubsAdminPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim() || !form.description.trim()) return;
+    if (!form.name.trim()) return;
 
     if (!editingId && usingConfig) {
       const ok = confirm(
-        `Diqqat: ${schoolConfig.clubs.length} ta namuna to'garak hali bazaga ko'chirilmagan.\n\n` +
-        `Hozir yangi to'garak qo'shsangiz, namunalar saytdan yo'qoladi.\n\nBaribir davom etasizmi?`
+        `Diqqat: ${schoolConfig.clubs.length} ta to'garak hali bazaga ko'chirilmagan.\n\n` +
+        `Hozir yangi to'garak qo'shsangiz, ular saytdan yo'qoladi.\n\nBaribir davom etasizmi?`
       );
       if (!ok) return;
     }
@@ -86,7 +86,7 @@ export default function ClubsAdminPage() {
     setError("");
     const payload = {
       name: form.name.trim(),
-      description: form.description.trim(),
+      description: form.description.trim() || undefined,
       category: form.category,
       teacher: form.teacher.trim() || undefined,
       schedule: form.schedule.trim() || undefined,
@@ -165,10 +165,10 @@ export default function ClubsAdminPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tavsif *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tavsif (ixtiyoriy)</label>
               <textarea value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                rows={3} placeholder="To'garak haqida qisqacha ma'lumot..." required className="input resize-none" />
+                rows={3} placeholder="To'garak haqida qisqacha ma'lumot..." className="input resize-none" />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
@@ -252,7 +252,7 @@ export default function ClubsAdminPage() {
                   {club.schedule && <p>🕐 {club.schedule}</p>}
                   {club.capacity && <p>👥 {club.capacity} nafar</p>}
                 </div>
-                {!isReal && <p className="mt-3 text-xs text-amber-600">Namuna — bazaga ko'chirilmagan</p>}
+                {!isReal && <p className="mt-3 text-xs text-amber-600">Saytda ko'rinadi, lekin bazaga ko'chirilmagan</p>}
               </div>
             );
           })}

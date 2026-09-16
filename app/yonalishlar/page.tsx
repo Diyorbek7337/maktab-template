@@ -10,6 +10,7 @@ import { getMajors, type MajorDoc } from "@/lib/firestore";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 import { majorSlug } from "@/lib/data";
 import { motion } from "framer-motion";
+import AdmissionInfo from "@/components/site/AdmissionInfo";
 
 type MajorItem = Major | MajorDoc;
 
@@ -97,9 +98,16 @@ export default function YonalishlarPage() {
                     <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
                       {major.name}
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500 leading-relaxed">
-                      {major.description}
-                    </p>
+                    {major.description ? (
+                      <p className="mt-2 text-sm text-gray-500 leading-relaxed line-clamp-3">{major.description}</p>
+                    ) : major.workplaces ? (
+                      <p className="mt-2 flex items-start gap-1.5 text-sm text-gray-500 leading-relaxed">
+                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                        </svg>
+                        <span><span className="font-medium text-gray-700">Ish joyi:</span> {major.workplaces}</span>
+                      </p>
+                    ) : null}
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
@@ -123,6 +131,11 @@ export default function YonalishlarPage() {
               ))}
             </motion.div>
           )}
+
+          {/* Qabul shartlari hamma yo'nalish uchun bir xil — ro'yxatdan keyin */}
+          <div className="mt-12">
+            <AdmissionInfo title={`Qabul ${schoolConfig.admission.period} oylarida`} />
+          </div>
 
         </div>
       </main>

@@ -13,6 +13,7 @@ const blank = () => ({
   duration: "",
   qualification: "",
   description: "",
+  workplaces: "",
   image: "",
 });
 
@@ -57,7 +58,8 @@ export default function MajorsAdminPage() {
       name: major.name,
       duration: major.duration,
       qualification: major.qualification,
-      description: major.description,
+      description: major.description ?? "",
+      workplaces: major.workplaces ?? "",
       image: major.image ?? "",
     });
     setShowForm(true);
@@ -73,14 +75,14 @@ export default function MajorsAdminPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim() || !form.duration.trim() || !form.qualification.trim() || !form.description.trim()) return;
+    if (!form.name.trim() || !form.duration.trim() || !form.qualification.trim()) return;
 
     // Namunalar hali bazaga ko'chirilmagan bo'lsa, yangi yozuv qo'shish
     // ularni saytdan yo'q qiladi — admin buni bilib turishi kerak.
     if (!editingId && usingConfig) {
       const ok = confirm(
-        `Diqqat: ${schoolConfig.majors.length} ta namuna yo'nalish hali bazaga ko'chirilmagan.\n\n` +
-        `Hozir yangi yo'nalish qo'shsangiz, namunalar saytdan butunlay yo'qoladi.\n\n` +
+        `Diqqat: ${schoolConfig.majors.length} ta yo'nalish hali bazaga ko'chirilmagan.\n\n` +
+        `Hozir yangi yo'nalish qo'shsangiz, ular saytdan butunlay yo'qoladi.\n\n` +
         `Avval "Bazaga ko'chirish" tugmasini bosishni tavsiya qilamiz.\n\nBaribir davom etasizmi?`
       );
       if (!ok) return;
@@ -92,7 +94,8 @@ export default function MajorsAdminPage() {
       name: form.name.trim(),
       duration: form.duration.trim(),
       qualification: form.qualification.trim(),
-      description: form.description.trim(),
+      description: form.description.trim() || undefined,
+      workplaces: form.workplaces.trim() || undefined,
       image: form.image.trim() || undefined,
     };
 
@@ -190,17 +193,17 @@ export default function MajorsAdminPage() {
                 <input
                   value={form.duration}
                   onChange={(e) => setForm((f) => ({ ...f, duration: e.target.value }))}
-                  placeholder="2 yil 10 oy"
+                  placeholder="2 yil"
                   required
                   className="input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beriladigan malaka *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bitiruvchiga beriladi *</label>
                 <input
                   value={form.qualification}
                   onChange={(e) => setForm((f) => ({ ...f, qualification: e.target.value }))}
-                  placeholder="Tarmoq muhandisi yordamchisi"
+                  placeholder="Kasbiy diplom"
                   required
                   className="input"
                 />
@@ -208,13 +211,22 @@ export default function MajorsAdminPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tavsif *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bitiruvchilar qayerda ishlaydi (ixtiyoriy)</label>
+              <input
+                value={form.workplaces}
+                onChange={(e) => setForm((f) => ({ ...f, workplaces: e.target.value }))}
+                placeholder="Zavod va fabrikalarda"
+                className="input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tavsif (ixtiyoriy)</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 rows={3}
                 placeholder="Yo'nalish haqida qisqacha ma'lumot..."
-                required
                 className="input resize-none"
               />
             </div>
@@ -290,9 +302,11 @@ export default function MajorsAdminPage() {
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">{major.duration}</span>
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600">{major.qualification}</span>
                 </div>
-                <p className="text-sm text-gray-500 line-clamp-3">{major.description}</p>
+                <p className="text-sm text-gray-500 line-clamp-3">
+                  {major.description ?? (major.workplaces ? `Ish joyi: ${major.workplaces}` : "")}
+                </p>
                 {!isReal && (
-                  <p className="mt-3 text-xs text-amber-600">Namuna — bazaga ko'chirilmagan</p>
+                  <p className="mt-3 text-xs text-amber-600">Saytda ko'rinadi, lekin bazaga ko'chirilmagan</p>
                 )}
               </div>
             );

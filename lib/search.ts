@@ -92,7 +92,7 @@ async function buildIndex(): Promise<IndexedResult[]> {
       title: m.name,
       subtitle: `${m.duration} · ${m.qualification}`,
       href: `/yonalishlar/${majorSlug(m.name)}`,
-      _text: `${m.name} ${m.qualification} ${m.description}`,
+      _text: `${m.name} ${m.qualification} ${m.description ?? ""} ${m.workplaces ?? ""}`,
     })),
     ...newsList.map((n) => ({
       kind: "news" as const,
@@ -104,8 +104,8 @@ async function buildIndex(): Promise<IndexedResult[]> {
     ...teacherList.map((t) => ({
       kind: "teacher" as const,
       title: t.name,
-      subtitle: `${t.subject} · ${t.experience} yil`,
-      href: "/#teachers",
+      subtitle: t.experience != null ? `${t.subject} · ${t.experience} yil` : t.subject,
+      href: "/oqituvchilar",
       _text: `${t.name} ${t.subject} ${t.achievement ?? ""}`,
     })),
     ...clubList.map((c) => ({
@@ -113,7 +113,7 @@ async function buildIndex(): Promise<IndexedResult[]> {
       title: c.name,
       subtitle: c.category,
       href: "/#clubs",
-      _text: `${c.name} ${c.category} ${c.description} ${c.teacher ?? ""}`,
+      _text: `${c.name} ${c.category} ${c.description ?? ""} ${c.teacher ?? ""} ${c.schedule ?? ""}`,
     })),
     ...alumniList.map((a) => ({
       kind: "alumni" as const,

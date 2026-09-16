@@ -131,12 +131,14 @@ export default function OqituvchilarPage() {
                     )}
                   </div>
 
+                  {teacher.experience != null && (
                   <div className="absolute bottom-4 right-4 text-right">
                     <div className="text-lg font-bold text-primary/20 transition-colors group-hover:text-primary/40">
                       {teacher.experience}
                     </div>
                     <div className="text-[10px] text-gray-300 transition-colors group-hover:text-gray-400">yil</div>
                   </div>
+                  )}
                 </motion.div>
               ))}
             </motion.div>

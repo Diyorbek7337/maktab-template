@@ -66,14 +66,25 @@ export default function MamuriyatPage() {
                   {director.position}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">{director.name}</h3>
-                <blockquote className="mt-3 border-l-4 border-primary/30 pl-4 italic text-gray-600">
-                  "{director.quote}"
-                </blockquote>
+                {director.quote && (
+                  <blockquote className="mt-3 border-l-4 border-primary/30 pl-4 italic text-gray-600">
+                    &ldquo;{director.quote}&rdquo;
+                  </blockquote>
+                )}
+                {director.phone && (
+                  <a
+                    href={`tel:${director.phone.replace(/\s/g, "")}`}
+                    className="mt-3 inline-block font-medium text-primary hover:text-primary-hover"
+                  >
+                    📞 {director.phone}
+                  </a>
+                )}
               </div>
             </div>
           </motion.div>
 
           {/* Qolgan ma'muriyat */}
+          {administration.length > 1 && (
           <div>
             <motion.h2
               variants={fadeUp}
@@ -118,6 +129,7 @@ export default function MamuriyatPage() {
               ))}
             </motion.div>
           </div>
+          )}
 
           <motion.div
             className="mt-10"

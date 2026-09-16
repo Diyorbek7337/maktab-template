@@ -59,8 +59,10 @@ export default function About() {
             )}
 
             <div className="absolute -bottom-6 -right-4 hidden max-w-xs rounded-xl border border-gray-100 bg-white p-4 shadow-lg lg:block">
-              <p className="text-sm italic text-gray-600 line-clamp-3">"{director.quote}"</p>
-              <div className="mt-3 flex items-center gap-2">
+              {director.quote && (
+                <p className="mb-3 text-sm italic text-gray-600 line-clamp-3">&ldquo;{director.quote}&rdquo;</p>
+              )}
+              <div className="flex items-center gap-2">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                   {director.name.charAt(0)}
                 </span>
@@ -116,8 +118,10 @@ export default function About() {
             </motion.div>
 
             <div className="mt-8 rounded-xl border-l-4 border-primary bg-primary/5 p-5 lg:hidden">
-              <p className="italic text-gray-700">"{director.quote}"</p>
-              <div className="mt-4 flex items-center gap-3">
+              {director.quote && (
+                <p className="mb-4 italic text-gray-700">&ldquo;{director.quote}&rdquo;</p>
+              )}
+              <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-white">
                   {director.name.charAt(0)}
                 </span>

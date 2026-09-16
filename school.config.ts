@@ -34,7 +34,7 @@ export interface HistoryEvent {
 export interface Teacher {
   name: string;
   subject: string;
-  experience: number; // yillik tajriba
+  experience?: number; // yillik tajriba (noma'lum bo'lsa ko'rsatilmaydi)
   achievement?: string; // unvon yoki yutuq
   image?: string;
 }
@@ -64,7 +64,7 @@ export type ClubCategory = "Sport" | "San'at" | "Fan" | "Texnologiya" | "Til" | 
 
 export interface Club {
   name: string;
-  description: string;
+  description?: string;
   category: ClubCategory;
   teacher?: string;   // mas'ul o'qituvchi
   schedule?: string;  // "Seshanba, Payshanba 15:00"
@@ -75,9 +75,20 @@ export interface Club {
 export interface Major {
   name: string;         // "Kompyuter tarmoqlari va tizimlari"
   duration: string;     // "2 yil 10 oy"
-  qualification: string; // beriladigan malaka: "Tarmoq muhandisi yordamchisi"
-  description: string;
+  qualification: string; // bitiruvchiga beriladi: malaka yoki hujjat ("Kasbiy diplom")
+  description?: string;
+  workplaces?: string;  // bitiruvchilar qayerda ishlay oladi
   image?: string;
+}
+
+export interface Admission {
+  period: string;       // "Iyun–Iyul"
+  requirement: string;  // kimlar qabul qilinadi
+  studyForm: string;    // "Kunduzgi, byudjet asosida"
+  duration: string;     // "2 yil"
+  document: string;     // bitirganda beriladigan hujjat
+  benefits: string[];   // qo'shimcha imkoniyatlar
+  chair?: { name: string; position: string; phone: string };
 }
 
 export interface SchoolTheme {
@@ -109,7 +120,9 @@ export interface SchoolConfig {
   director: {
     name: string;
     position: string;
-    quote: string;
+    /** Faqat direktorning o'z so'zlari bo'lsa to'ldiring — bo'sh qolsa ko'rsatilmaydi */
+    quote?: string;
+    phone?: string;
   };
 
   // --- Ma'muriyat ---
@@ -123,6 +136,9 @@ export interface SchoolConfig {
 
   // --- Kasb-hunar yo'nalishlari ---
   majors: Major[];
+
+  // --- Qabul (barcha yo'nalishlar uchun umumiy shartlar) ---
+  admission: Admission;
 
   // --- Eng yaxshi o'qituvchilar ---
   teachers: Teacher[];
@@ -162,40 +178,32 @@ export interface SchoolConfig {
 
 export const schoolConfig: SchoolConfig = {
   number: "1",
-  name: "Sho'rchi tumani 1-son kasb-hunar texnikumi",
-  shortName: "1-KHT",
+  name: "Sho'rchi tumani 1-son texnikumi",
+  shortName: "1-son texnikum",
   slogan: "Kasb — kelajak kaliti. Har bir talabaning muvaffaqiyati uchun.",
   logo: "/gerb.png", // texnikum gerbi — public/gerb.png fayliga qo'ying
   schoolImage: "", // texnikum binosi rasmi: "/school.jpg" yoki tashqi URL
 
-  address: "Surxondaryo viloyati, Sho'rchi tumani, Mustaqillik ko'chasi, 1-uy",
-  phones: ["+998 90 123 45 67", "+998 91 234 56 78"],
+  address: "Surxondaryo viloyati, Sho'rchi tumani, Mustaqillik ko'chasi, 64-uy",
+  phones: ["+998 99 679 33 81"],
   email: "info@texnikum1.uz",
-  workingHours: "Dushanba–Shanba, 08:00–18:00",
+  workingHours: "Dushanba–Shanba, 08:00–16:00",
 
   director: {
-    name: "Aliyev Vali Akramovich",
+    name: "Avazov G'ulom Jovliyevich",
     position: "Texnikum direktori",
-    quote:
-      "Texnikumimiz eshigi har bir yoshga ochiq. Biz nazariy bilim bilan birga amaliy kasb-mahorat beramiz — bitiruvchilarimiz ish bozorida talab qilinadi.",
+    phone: "+998 99 679 33 81",
   },
 
   administration: [
-    { name: "Aliyev Vali Akramovich", position: "Direktor" },
-    { name: "Karimova Nilufar Hasanovna", position: "O'quv-ishlab chiqarish ishlari bo'yicha direktor o'rinbosari" },
-    { name: "Tursunov Bobur Salimovich", position: "Tarbiya ishlari bo'yicha direktor o'rinbosari" },
-    { name: "Yusupova Sarvinoz Mirzaevna", position: "Bosh buxgalter" },
-    { name: "Qodirov Anvar Behruzovich", position: "Xo'jalik mudiri" },
-    { name: "Hamidova Zulfiya Rahimovna", position: "Psixolog" },
+    { name: "Avazov G'ulom Jovliyevich", position: "Direktor, qabul komissiyasi raisi" },
   ],
 
   stats: [
-    { value: "1200+", label: "Talabalar" },
-    { value: "85", label: "O'qituvchilar" },
-    // Diqqat: bu raqam quyidagi `majors` ro'yxati bilan mos bo'lishi kerak.
-    // Yangi yo'nalish qo'shsangiz, shu qiymatni ham yangilang.
-    { value: "8", label: "Yo'nalishlar" },
-    { value: "30+", label: "Yillik tajriba" },
+    { value: "65", label: "O'qituvchilar" },
+    { value: "17", label: "Ustalar" },
+    { value: "12", label: "Ustaxonalar" },
+    { value: "750", label: "Bitiruvchilar" },
   ],
 
   history: [
@@ -233,91 +241,130 @@ export const schoolConfig: SchoolConfig = {
 
   majors: [
     {
-      name: "Kompyuter tarmoqlari va tizimlari",
-      duration: "2 yil 10 oy",
-      qualification: "Tarmoq muhandisi yordamchisi",
-      description: "Kompyuter tarmoqlarini o'rnatish va sozlash, tizim ma'muriyati, veb-dasturlash asoslari.",
+      name: "Raqamli axborotlarni qayta ishlash ustasi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
     },
     {
-      name: "Buxgalteriya hisobi va audit",
-      duration: "2 yil 10 oy",
-      qualification: "Buxgalter yordamchisi",
-      description: "Moliyaviy hisobot, 1C dasturi, soliq hisob-kitobi va audit asoslari.",
+      name: "Tikuvchi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Tekstil firmalari va shaxsiy tikuv sexlarida",
     },
     {
-      name: "Tikuvchilik ishlab chiqarish texnologiyasi",
-      duration: "1 yil 10 oy",
-      qualification: "Tikuvchi-texnolog",
-      description: "Kiyim-kechak konstruksiyasi, tikuv mashinalarida ishlash, zamonaviy modellashtirish.",
+      name: "Elektromontyor",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Zavod va fabrikalarda",
     },
     {
-      name: "Avtomobillarga texnik xizmat ko'rsatish va ta'mirlash",
-      duration: "2 yil 10 oy",
-      qualification: "Avtomexanik",
-      description: "Zamonaviy avtomobil diagnostikasi, dvigatel va elektr jihozlarini ta'mirlash.",
+      name: "Payvandlovchi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Zavod va fabrikalarda",
     },
     {
-      name: "Elektr ta'minoti tizimlari",
-      duration: "2 yil 10 oy",
-      qualification: "Elektrik-montyor",
-      description: "Elektr tarmoqlarini o'rnatish, xavfsizlik texnikasi, sanoat va maishiy elektr jihozlari.",
+      name: "Qurilish ishlari ishchisi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Qurilish sohasi va qurilish firmalarida",
     },
     {
-      name: "Oshpazlik va restoran xizmati",
-      duration: "1 yil 10 oy",
-      qualification: "Oshpaz",
-      description: "Milliy va jahon oshxonasi taomlari, oshxona sanitariyasi, restoran xizmat ko'rsatish madaniyati.",
+      name: "Pardozlovchi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Qurilish sohasi va qurilish firmalarida",
     },
     {
-      name: "Sartaroshlik va go'zallik xizmati",
-      duration: "1 yil 10 oy",
-      qualification: "Sartarosh-stilist",
-      description: "Zamonaviy soch turmagi, bo'yash texnikalari, mijozlar bilan ishlash madaniyati.",
+      name: "Elevator, tegirmon, yorma va omuxta yem ishlab chiqarish",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Un zavodlari va shu kabi korxonalarda",
     },
     {
-      name: "Qurilish va ta'mirlash ishlari",
-      duration: "2 yil 10 oy",
-      qualification: "Qurilish ustasi",
-      description: "Bino qurilishi asoslari, ichki-tashqi pardozlash ishlari, zamonaviy qurilish materiallari.",
+      name: "Bino va inshootlar pardozlovchisi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Qurilish sohasi va qurilish firmalarida",
+    },
+    {
+      name: "Kompyuter va IT",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Pochta va boshqa korxonalarda texnik xodim sifatida",
+    },
+    {
+      name: "Avtomobil servisi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Avtomobilga xizmat ko'rsatish ustaxonalari va zavodlarda",
+    },
+    {
+      name: "Moda va tikuv ishlab chiqarish texnologiyasi",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Tekstil firmalari va shaxsiy tikuv sexlarida",
+    },
+    {
+      name: "Metallga qayta ishlov berish",
+      duration: "2 yil",
+      qualification: "Kasbiy diplom",
+      workplaces: "Zavod va fabrikalarda",
     },
   ],
 
+  admission: {
+    period: "Iyun–Iyul",
+    requirement: "9-sinfni tamomlaganlar",
+    studyForm: "Kunduzgi, byudjet asosida",
+    duration: "2 yil",
+    document: "Kasbiy diplom",
+    benefits: [
+      "Yevropada ishlash uchun yo'llanma beriladi",
+      "Shu yo'nalishdagi universitetlarga 2-bosqichdan suhbat asosida, kontrakt asosida o'qishga qabul qilinadi",
+    ],
+    chair: {
+      name: "Avazov G'ulom Jovliyevich",
+      position: "Qabul komissiyasi raisi",
+      phone: "+998 99 679 33 81",
+    },
+  },
+
   teachers: [
     {
-      name: "Karimova Nilufar Hasanovna",
-      subject: "Kompyuter tarmoqlari",
-      experience: 18,
-      achievement: "O'zbekiston Respublikasi xalq ta'limi a'lochisi",
+      name: "Qo'chqorov Haqnazar",
+      subject: "Elektromontyor",
+      experience: 30,
+      achievement: "Shogirdlari viloyat texnikumlari o'rtasidagi «Kasbim — faxrim» ko'rik-tanlovida 1-o'rinni egalladi",
     },
     {
-      name: "Ahmedova Dilnoza Baxtiyorovna",
-      subject: "Ingliz tili",
-      experience: 12,
-      achievement: "Viloyat ko'rik-tanlovida I o'rin",
-    },
-    {
-      name: "Tursunov Bobur Salimovich",
-      subject: "Avtomexanika",
+      name: "Ismoilov Raxmatilla",
+      subject: "Payvandlovchi",
       experience: 15,
-      achievement: "\"Yilning eng yaxshi ustoz-murabbiysi\" 2023",
+      achievement: "Payvandlovchi kasbi bo'yicha xalqaro sertifikat sohibi",
     },
     {
-      name: "Hamidova Zulfiya Rahimovna",
-      subject: "Buxgalteriya hisobi",
-      experience: 10,
-      achievement: "Respublika metodist o'qituvchisi",
+      name: "Turopov Ilhom",
+      subject: "Payvandlovchi",
+      experience: 15,
+      achievement: "Payvandlovchi kasbi bo'yicha xalqaro sertifikat sohibi",
     },
     {
-      name: "Olimov Farhodjon Hamidovich",
-      subject: "Elektr ta'minoti",
-      experience: 14,
-      achievement: "Kasbiy mahorat musobaqalarida 3 marta g'oliblar tayyorlagan",
+      name: "Abdurahmonov Shohjahon",
+      subject: "Informatika",
+      achievement: "Oliy toifali o'qituvchi",
     },
     {
-      name: "Sodiqova Malika Norqo'zievna",
-      subject: "Tikuvchilik texnologiyasi",
-      experience: 20,
-      achievement: "O'zbekiston Respublikasi Faxriy o'qituvchisi",
+      name: "Usanov Maqsudjon",
+      subject: "Informatika",
+      experience: 5,
+      achievement: "Oliy toifali o'qituvchi",
+    },
+    {
+      name: "Shaymurodov Yigitali",
+      subject: "Ingliz tili",
+      experience: 5,
+      achievement: "Oliy toifali o'qituvchi",
     },
   ],
 
@@ -372,54 +419,11 @@ export const schoolConfig: SchoolConfig = {
   ],
 
   clubs: [
-    {
-      name: "Robototexnika",
-      description: "Lego Mindstorms va Arduino yordamida robot yasash, dasturlash asoslarini o'rganish.",
-      category: "Texnologiya",
-      teacher: "Holmatov Jasur",
-      schedule: "Seshanba, Payshanba 15:00–17:00",
-      capacity: 20,
-    },
-    {
-      name: "Ingliz tili klubi",
-      description: "Chet tili muloqoti, ingliz tilidagi filmlar tahlili va nutq madaniyatini rivojlantirish.",
-      category: "Til",
-      teacher: "Ahmedova Dilnoza",
-      schedule: "Dushanba, Chorshanba 15:00–16:30",
-      capacity: 25,
-    },
-    {
-      name: "Mini futbol",
-      description: "Texnikum chempionati va tuman musobaqalariga tayyorgarlik ko'rish, jamoaviy o'yin madaniyati.",
-      category: "Sport",
-      teacher: "Razzaqov Sanjar",
-      schedule: "Har kuni 16:00–18:00",
-      capacity: 30,
-    },
-    {
-      name: "Rasm to'garagi",
-      description: "Suvli bo'yoq, qalam va raqamli rasm chizish. Texnikum ko'rik-tanlovlariga ishtirok.",
-      category: "San'at",
-      teacher: "Nazarova Gulnora",
-      schedule: "Juma, Shanba 14:00–16:00",
-      capacity: 15,
-    },
-    {
-      name: "Tadbirkorlik asoslari",
-      description: "O'z biznesini boshlash, moliyaviy savodxonlik va startap g'oyalarini rivojlantirish.",
-      category: "Fan",
-      teacher: "Karimova Nilufar",
-      schedule: "Seshanba, Juma 15:00–17:00",
-      capacity: 18,
-    },
-    {
-      name: "Voleybol",
-      description: "Qizlar va yigitlar uchun voleybol musobaqa va mashg'ulotlari.",
-      category: "Sport",
-      teacher: "Ibragimova Mohira",
-      schedule: "Dushanba, Chorshanba, Juma 15:30–17:30",
-      capacity: 24,
-    },
+    { name: "Yosh elektrik", category: "Texnologiya", teacher: "Esonov Boysoat", schedule: "Chorshanba, 14:00–16:00" },
+    { name: "Mohir qo'llar", category: "San'at", teacher: "Ibragimov Xosiyat", schedule: "Seshanba, 13:00–15:00" },
+    { name: "Futbol", category: "Sport", teacher: "Choriyev To'rabek", schedule: "Juma, 14:00–16:00" },
+    { name: "Foundation IELTS", category: "Til", teacher: "Nazarov Bobomurod", schedule: "Payshanba, 13:00–15:00" },
+    { name: "Yosh Temurbeklar", category: "Boshqa", teacher: "Xudoyorov Shavkat", schedule: "Dushanba, 14:00–16:00" },
   ],
 
   usefulLinks: [
