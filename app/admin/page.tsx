@@ -179,12 +179,6 @@ export default function AdminDashboard() {
             + Yo'nalish qo'shish
           </Link>
           <Link
-            href="/admin/schedule"
-            className="rounded-lg border-2 border-primary px-5 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-          >
-            Dars jadvalini tahrirlash
-          </Link>
-          <Link
             href="/admin/gallery"
             className="rounded-lg border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 hover:border-primary hover:text-primary transition-colors"
           >

@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 };
 import Hero from "@/components/site/Hero";
 import About from "@/components/site/About";
-import Schedule from "@/components/site/Schedule";
 import History from "@/components/site/History";
 import OlympiadWinners from "@/components/site/OlympiadWinners";
 import Gallery from "@/components/site/Gallery";
@@ -36,7 +35,6 @@ export default function HomePage() {
         <Hero />
         <About />
         <News />
-        <Schedule />
         <Gallery />
         <Clubs />
         <OlympiadWinners />

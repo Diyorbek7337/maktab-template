@@ -445,21 +445,3 @@ export async function deleteNews(id: string, images?: string[]): Promise<void> {
     deleteDoc(doc(db, "news", id)),
   ]);
 }
-
-// ── Dars jadvali ──────────────────────────────────────────────
-import type { Weekday, ScheduleEntry } from "./data";
-
-export async function getSchedule(): Promise<Record<Weekday, ScheduleEntry[]> | null> {
-  const snap = await getDocs(collection(db, "schedule"));
-  if (snap.empty) return null;
-  const result: Record<string, ScheduleEntry[]> = {};
-  snap.docs.forEach((d) => { result[d.id] = d.data().entries as ScheduleEntry[]; });
-  return result as Record<Weekday, ScheduleEntry[]>;
-}
-
-export async function saveFullSchedule(schedule: Record<Weekday, ScheduleEntry[]>): Promise<void> {
-  const promises = (Object.entries(schedule) as [Weekday, ScheduleEntry[]][]).map(
-    ([day, entries]) => setDoc(doc(db, "schedule", day), { entries })
-  );
-  await Promise.all(promises);
-}

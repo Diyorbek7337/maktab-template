@@ -14,7 +14,6 @@ const menu = [
   { href: "/admin/teachers",         label: "O'qituvchilar",        icon: "teacher"  },
   { href: "/admin/olympiad",         label: "Musobaqa g'oliblari",  icon: "medal"    },
   { href: "/admin/gallery",          label: "Galereya",             icon: "image"    },
-  { href: "/admin/schedule",         label: "Dars jadvali",         icon: "calendar" },
   { href: "/admin/clubs",            label: "To'garaklar",          icon: "club"     },
   { href: "/admin/alumni",           label: "Bitiruvchilar",         icon: "alumni"   },
   { href: "/admin/messages",         label: "Xabarlar",             icon: "inbox"    },
