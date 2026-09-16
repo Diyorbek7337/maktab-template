@@ -6,9 +6,10 @@ import { schoolConfig, type Club, type ClubCategory } from "@/school.config";
 import { getClubs, type ClubDoc } from "@/lib/firestore";
 import { fadeUp, stagger, scaleIn } from "@/lib/animations";
 
-const CATEGORIES: ClubCategory[] = ["Sport", "San'at", "Fan", "Texnologiya", "Til", "Boshqa"];
+const CATEGORIES: ClubCategory[] = ["Kasbiy", "Fan", "Sport", "San'at", "Texnologiya", "Til", "Boshqa"];
 
 const CATEGORY_COLORS: Record<ClubCategory, string> = {
+  Kasbiy:      "bg-amber-100 text-amber-700",
   Sport:       "bg-orange-100 text-orange-700",
   "San'at":    "bg-pink-100 text-pink-700",
   Fan:         "bg-blue-100 text-blue-700",
@@ -18,6 +19,11 @@ const CATEGORY_COLORS: Record<ClubCategory, string> = {
 };
 
 const CATEGORY_ICONS: Record<ClubCategory, React.ReactNode> = {
+  Kasbiy: (
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+  ),
   Sport: (
     <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10" />

@@ -7,7 +7,7 @@ import {
 } from "@/lib/firestore";
 import { schoolConfig, type ClubCategory } from "@/school.config";
 
-const CATEGORIES: ClubCategory[] = ["Sport", "San'at", "Fan", "Texnologiya", "Til", "Boshqa"];
+const CATEGORIES: ClubCategory[] = ["Kasbiy", "Fan", "Sport", "San'at", "Texnologiya", "Til", "Boshqa"];
 
 const blank = () => ({
   name: "",

@@ -60,7 +60,8 @@ export interface Alumni {
   image?: string;
 }
 
-export type ClubCategory = "Sport" | "San'at" | "Fan" | "Texnologiya" | "Til" | "Boshqa";
+// "Kasbiy" — texnikum yo'nalishiga oid amaliy to'garaklar (tikuvchilik, elektr montaj)
+export type ClubCategory = "Kasbiy" | "Sport" | "San'at" | "Fan" | "Texnologiya" | "Til" | "Boshqa";
 
 export interface Club {
   name: string;
@@ -419,11 +420,11 @@ export const schoolConfig: SchoolConfig = {
   ],
 
   clubs: [
-    { name: "Yosh elektrik", category: "Texnologiya", teacher: "Esonov Boysoat", schedule: "Chorshanba, 14:00–16:00" },
-    { name: "Mohir qo'llar", category: "San'at", teacher: "Ibragimov Xosiyat", schedule: "Seshanba, 13:00–15:00" },
+    { name: "Yosh elektrik", description: "Elektr montaj to'garagi", category: "Kasbiy", teacher: "Esonov Boysoat", schedule: "Chorshanba, 14:00–16:00" },
+    { name: "Mohir qo'llar", description: "Tikuvchilik to'garagi", category: "Kasbiy", teacher: "Ibragimov Xosiyat", schedule: "Seshanba, 13:00–15:00" },
     { name: "Futbol", category: "Sport", teacher: "Choriyev To'rabek", schedule: "Juma, 14:00–16:00" },
     { name: "Foundation IELTS", category: "Til", teacher: "Nazarov Bobomurod", schedule: "Payshanba, 13:00–15:00" },
-    { name: "Yosh Temurbeklar", category: "Boshqa", teacher: "Xudoyorov Shavkat", schedule: "Dushanba, 14:00–16:00" },
+    { name: "Yosh Temurbeklar", description: "Tarix to'garagi", category: "Fan", teacher: "Xudoyorov Shavkat", schedule: "Dushanba, 14:00–16:00" },
   ],
 
   usefulLinks: [
